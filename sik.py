@@ -175,11 +175,11 @@ def select_index_file():
 def main():
     create_indices_dir()
     parser = argparse.ArgumentParser(
-        description="Search markdown files for a query.")
+        description="Query your markdown files")
     parser.add_argument(
-        "-q", "--query", help="The query to search for in the markdown files.")
+        "-q", "--query", help="Word(s) to search for")
     parser.add_argument(
-        "-d", "--dir", help="The directory to start indexing and searching")
+        "-d", "--dir", help="The directory to start index")
     parser.add_argument("--index", action='store_true',
                         help="Create indices for the markdown files.")
 
