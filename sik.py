@@ -5,7 +5,7 @@ import re
 import json
 import argparse
 
-INDICES_DIR = "./indices"
+INDICES_DIR = f"{os.path.expanduser('~')}/.sik_indices"
 
 
 def read_markdown_files(directory):
@@ -140,7 +140,8 @@ def get_index_file(directory):
 
 
 def list_available_indices():
-    return [file for file in os.listdir(INDICES_DIR) if file.endswith('_index.sik')]
+    return [file for file in
+            os.listdir(INDICES_DIR) if file.endswith('_index.sik')]
 
 
 def create_indices_dir():
