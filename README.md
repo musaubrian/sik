@@ -1,6 +1,7 @@
 # sik
 
-Sik allows you to efficiently search through Markdown files within a directory and quickly find the information you need.
+Sik allows you to search through Markdown files within a directory and quickly find the information you need.
+
 
 ## Features
 - **Flexible Querying:** You can search for any query within the Markdown files. The search is not case-sensitive and supports partial word matches.
@@ -26,10 +27,13 @@ python3 sik.py -q <random_query>
 ```
 
 ## Contributing
-This script is open for contributions!
+This project is open for contributions!
 Feel free to fork the repository, make improvements, and submit pull requests.
-Whether it's adding new features, fixing bugs, or enhancing the documentation, every contribution is appreciated.
 
 ## License
-This project is licensed under the MIT License, allowing you to use, modify, and distribute the code for both commercial and non-commercial purposes. See the LICENSE file for more details.
+This project is licensed under the MIT License, allowing you to use, modify, and distribute the code for both commercial and non-commercial purposes. See the [LICENSE](./LICENSE) file for more details.
 
+
+> [!NOTE]
+>
+> Inspired by [seroost](https://github.com/tsoding/seroost)
