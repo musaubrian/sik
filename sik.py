@@ -106,12 +106,21 @@ def search_kb(query, index_path):
             grouped_results[parent_dir].append((location, highlighted_line))
 
     for parent_dir, file_results in grouped_results.items():
-        print(print_bold(darken(parent_dir)))
+        print(print_bold(darken(remove_prefix(parent_dir))))
         for location, highlighted_line in file_results:
             print(
                 f"   {darken(print_bold(location), level=2)}  "
                 f"  {darken(highlighted_line.strip(), level=4)}")
         print()
+
+
+def remove_prefix(line: str) -> str:
+    if line.startswith("/"):
+        return line.removeprefix("/")
+    elif line.startswith("\\"):
+        return line.removeprefix("\\")
+    else:
+        raise Exception(f"Unexpected prefix in {line}")
 
 
 def print_bold(text):
