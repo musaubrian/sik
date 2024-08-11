@@ -5,7 +5,9 @@ import re
 import json
 import argparse
 
-INDICES_DIR = f"{os.path.expanduser('~')}/.sik_indices"
+INDICES_DIR = f"{os.path.expanduser('~')}/.sik"
+INDEX_LOCATION = f"{INDICES_DIR}/index.sik"
+OUTPUT_STYLE = "ansi"
 
 
 def read_markdown_files(directory):
@@ -14,7 +16,7 @@ def read_markdown_files(directory):
         for file in files:
             if file.endswith(".md"):
                 filepath = os.path.join(root, file)
-                with open(filepath, 'r', encoding='utf-8') as f:
+                with open(filepath, "r", encoding="utf-8") as f:
                     content = f.read()
                 files_content[filepath] = content
     return files_content
@@ -22,9 +24,9 @@ def read_markdown_files(directory):
 
 def create_index(content):
     index = {}
-    lines = content.split('\n')
+    lines = content.split("\n")
     for line_no, line in enumerate(lines, start=1):
-        for match in re.finditer(r'\w+', line.lower()):
+        for match in re.finditer(r"\w+", line.lower()):
             word = match.group()
             col_no = match.start()
             if word not in index:
@@ -38,19 +40,23 @@ def create_indices_for_directory(directory):
     files_content = read_markdown_files(directory)
     for file_path, content in files_content.items():
         index = create_index(content)
-        indices[file_path] = {'index': index, 'content': content}
+        indices[file_path] = {"index": index, "content": content}
     return indices
 
 
 def store_indices(indices, file_path):
-    with open(file_path, 'w', encoding='utf-8') as file:
+    with open(file_path, "w", encoding="utf-8") as file:
         json.dump(indices, file)
 
 
 def load_indices(file_path):
-    with open(file_path, 'r', encoding='utf-8') as file:
-        indices = json.load(file)
-    return indices
+    try:
+        with open(file_path, "r", encoding="utf-8") as file:
+            indices = json.load(file)
+        return indices
+    except FileNotFoundError:
+        raise Exception(
+            f"File not found: {file_path}, Try creating an index first")
 
 
 def search_index(query, index, file_path):
@@ -59,7 +65,7 @@ def search_index(query, index, file_path):
 
     for word in index:
         if any(query_word in word for query_word in query_words):
-            for (line_no, col_no) in index[word]:
+            for line_no, col_no in index[word]:
                 results.append((line_no, col_no, file_path))
     return results
 
@@ -67,7 +73,7 @@ def search_index(query, index, file_path):
 def search_indices(query, indices):
     results = {}
     for file_path, file_data in indices.items():
-        index = file_data['index']
+        index = file_data["index"]
         file_results = search_index(query, index, file_path)
         if file_results:
             results[file_path] = file_results
@@ -75,14 +81,15 @@ def search_indices(query, indices):
 
 
 def highlight_query_in_line(query, line):
-    query_words = re.findall(r'\w+', query.lower())
-    words = re.findall(r'\w+', line)
+    query_words = re.findall(r"\w+", query.lower())
+    words = re.findall(r"\w+", line)
     highlighted_line = line
     for word in words:
         for query_word in query_words:
             if query_word in word.lower():
-                highlighted_line = re.sub(f"({word})", highlight(
-                    r'\1'), highlighted_line, flags=re.IGNORECASE)
+                highlighted_line = re.sub(
+                    f"({word})", highlight(r"\1"), highlighted_line, flags=re.IGNORECASE
+                )
     return highlighted_line
 
 
@@ -99,8 +106,8 @@ def search_kb(query, index_path):
             grouped_results[parent_dir] = []
 
         for line_no, col_no, file_path in locations:
-            content = indices[file_path]['content']
-            line = content.split('\n')[line_no - 1]
+            content = indices[file_path]["content"]
+            line = content.split("\n")[line_no - 1]
             highlighted_line = highlight_query_in_line(query, line)
             location = f"{os.path.basename(file_path)}:{line_no}"
             grouped_results[parent_dir].append((location, highlighted_line))
@@ -109,8 +116,9 @@ def search_kb(query, index_path):
         print(print_bold(darken(remove_prefix(parent_dir))))
         for location, highlighted_line in file_results:
             print(
-                f"   {darken(print_bold(location), level=2)}  "
-                f"  {darken(highlighted_line.strip(), level=4)}")
+                f"   {darken(print_bold(location), level=2)}"
+                f"  {darken(highlighted_line.strip(), level=4)}"
+            )
         print()
 
 
@@ -124,11 +132,17 @@ def remove_prefix(line: str) -> str:
 
 
 def print_bold(text):
-    return f"\033[1m{text}\033[0m"
+    if OUTPUT_STYLE == "ansi":
+        return f"\033[1m{text}\033[0m"
+    else:
+        return f"<b>{text}</b>"
 
 
 def highlight(text):
-    return f"\033[38;5;208m{text}\033[0m"
+    if OUTPUT_STYLE == "ansi":
+        return f"\033[38;5;208m{text}\033[0m"
+    else:
+        return f"<span style='color: #ff8c00;'>{text}</span>"
 
 
 def darken(text, level=1):
@@ -143,55 +157,55 @@ def darken(text, level=1):
     return f"\033[38;2;{r};{g};{b}m{text}\033[0m"
 
 
-def get_index_file(directory):
-    dir_name = os.path.basename(os.path.normpath(directory))
-    return f"{dir_name}_index.sik"
-
-
-def list_available_indices():
-    return [file for file in
-            os.listdir(INDICES_DIR) if file.endswith('_index.sik')]
-
-
-def create_indices_dir():
+def create_index_dir():
     if not os.path.exists(INDICES_DIR):
         os.makedirs(INDICES_DIR)
         print(print_bold(darken(f"Created {INDICES_DIR}", level=5)))
+        print(print_bold(darken(
+            f"Run <sik.py --index --dir [path/to/dir]> to create an index", level=5)))
 
 
-def select_index_file():
-    available_indices = list_available_indices()
-    if not available_indices:
-        print(darken("No index files found. Please create an index first."))
-        return None
+def json_query_result(query, index_path):
+    global OUTPUT_STYLE
+    OUTPUT_STYLE = "html"
+    indices = load_indices(index_path)
+    results = search_indices(query, indices)
+    if not results:
+        return []
 
-    if len(available_indices) == 1:
-        return available_indices[0]
+    json_results = []
+    for file_path, locations in results.items():
+        occurrences = []
+        for line_no, col_no, _ in locations[:3]:
+            content = indices[file_path]["content"]
+            line = content.split("\n")[line_no - 1]
+            highlighted_line = highlight_query_in_line(query, line)
+            occurrences.append(f"<b>{line_no}:</b> {highlighted_line.strip()}")
 
-    print(print_bold("Available indices:"))
-    print(darken("=" * 30))
-    for idx, file in enumerate(available_indices, 1):
-        print(f"{darken(f'{idx:2d}:')} {print_bold(file)}")
-    print(darken("=" * 30))
+        json_results.append({
+            "full_path": file_path,
+            "filename": os.path.basename(file_path),
+            "hits": occurrences
+        })
 
-    choice = int(input(darken("Select the index file by number: "))) - 1
-    if 0 <= choice < len(available_indices):
-        return available_indices[choice]
-    else:
-        print(darken("Invalid selection."))
-        return None
+    return json_results
 
 
 def main():
-    create_indices_dir()
-    parser = argparse.ArgumentParser(
-        description="Query your markdown files")
+    create_index_dir()
+
+    parser = argparse.ArgumentParser(description="Query your markdown files")
+    parser.add_argument("-q", "--query", help="Word(s) to search for")
+    parser.add_argument("-d", "--dir", help="The directory to index")
     parser.add_argument(
-        "-q", "--query", help="Word(s) to search for")
+        "--json",
+        action="store_true",
+        help="Get query results in json for easy parsing.")
     parser.add_argument(
-        "-d", "--dir", help="The directory to start index")
-    parser.add_argument("--index", action='store_true',
-                        help="Create indices for the markdown files.")
+        "--index",
+        action="store_true",
+        help="Create indices for the markdown files."
+    )
 
     args = parser.parse_args()
     directory = args.dir
@@ -200,17 +214,21 @@ def main():
         if directory is None:
             print("Please specify a directory to index.")
             return
-        json_index_path = f"{INDICES_DIR}/{get_index_file(directory)}"
+        json_index_path = INDEX_LOCATION
         print("Indexing files...")
         indices = create_indices_for_directory(directory)
         store_indices(indices, json_index_path)
         print(f"Created index: {print_bold(json_index_path)}")
     elif args.query:
-        json_index_path = f"{INDICES_DIR}/{select_index_file()}"
+        json_index_path = INDEX_LOCATION
         if json_index_path is None:
             return
         query = args.query
-        search_kb(query, json_index_path)
+        if args.json:
+            json_results = json_query_result(query, json_index_path)
+            print(json.dumps(json_results, indent=4))
+        else:
+            search_kb(query, json_index_path)
     else:
         parser.print_help()
 
