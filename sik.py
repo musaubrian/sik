@@ -6,7 +6,7 @@ import json
 import argparse
 
 INDICES_DIR = f"{os.path.expanduser('~')}/.sik"
-INDEX_LOCATION = f"{INDICES_DIR}/index.sik"
+INDEX_LOCATION = os.path.join(INDICES_DIR, "index.sik")
 OUTPUT_STYLE = "ansi"
 
 
@@ -165,6 +165,15 @@ def create_index_dir():
             f"Run <sik.py --index --dir [path/to/dir]> to create an index", level=5)))
 
 
+def create_config_file():
+    config_path = os.path.join(INDICES_DIR, "config.toml")
+    if not os.path.isfile(config_path):
+        where_am_i = os.path.realpath(__file__)
+        contents = f"sik_source='{where_am_i}'"
+        with open(config_path, "w", encoding="utf-8") as file:
+            file.write(contents)
+
+
 def json_query_result(query, index_path):
     global OUTPUT_STYLE
     OUTPUT_STYLE = "html"
@@ -180,7 +189,8 @@ def json_query_result(query, index_path):
             content = indices[file_path]["content"]
             line = content.split("\n")[line_no - 1]
             highlighted_line = highlight_query_in_line(query, line)
-            occurrences.append(f"<b>{line_no}:</b> {highlighted_line.strip()}")
+            occurrences.append(
+                f"<b>{line_no}:</b> {highlighted_line.strip()}")
 
         json_results.append({
             "full_path": file_path,
@@ -193,6 +203,7 @@ def json_query_result(query, index_path):
 
 def main():
     create_index_dir()
+    create_config_file()
 
     parser = argparse.ArgumentParser(description="Query your markdown files")
     parser.add_argument("-q", "--query", help="Word(s) to search for")
