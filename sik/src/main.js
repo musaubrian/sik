@@ -3,6 +3,14 @@ const { invoke } = window.__TAURI__.core
 let searchInputEl
 let searchResultEl
 
+async function openUrl(url) {
+  if (url.length > 1) {
+    await invoke('open_file', {
+      url: url,
+    })
+  }
+}
+
 async function searchQuery() {
   searchResultEl.innerHTML = ''
 
@@ -10,7 +18,6 @@ async function searchQuery() {
     query: searchInputEl.value,
   })
   const jsonRes = JSON.parse(result)
-  console.log(jsonRes)
   if (jsonRes.length < 1) {
     const noResultSpan = document.createElement('span')
     noResultSpan.id = 'noResult'
@@ -31,6 +38,13 @@ async function searchQuery() {
     const fileLink = document.createElement('a')
     fileLink.href = `file://${element.full_path}`
     fileLink.innerText = element.filename
+
+    // Add click event listener to the link
+    fileLink.addEventListener('click', function (e) {
+      e.preventDefault()
+      const hrefValue = this.getAttribute('href')
+      openUrl(hrefValue)
+    })
 
     const hitsList = document.createElement('ul')
     hitsList.className = 'hits-list'
