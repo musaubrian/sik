@@ -26,6 +26,23 @@ If you have more than one index, you'll be prompted to pick one
 python3 sik.py -q <random_query>
 ```
 
+## GUI
+
+Sik now has a gui version.
+It does still depend on the sik cli version to handle the searching and indexing functionality
+
+### Usage
+Currently you have to build it from source.
+
+```sh
+cd sik
+npm tauri dev
+# This will spin up the development server
+#or build application using
+npm tauri build
+```
+
+
 ## Contributing
 This project is open for contributions!
 Feel free to fork the repository, make improvements, and submit pull requests.

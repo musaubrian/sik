@@ -1,7 +1,7 @@
 {
   "productName": "sik",
   "version": "0.0.0",
-  "identifier": "com.tauri.dev",
+  "identifier": "sik.io.github.musaubrian",
   "build": {
     "frontendDist": "../src"
   },
