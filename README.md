@@ -1,54 +1,45 @@
 # sik
 
+> [!WARNING]
+>
+> The project was rewritten to use Go and a **proper-ish* indexing method
+> If you would still like to use the old python version, it will always be available at the [py](https://github.com/musaubrian/sik/tree/py) branch.
+
 Sik allows you to search through Markdown files within a directory and quickly find the information you need.
 
+## TODO:
+- [] **Flexible Querying(WIP):** You can search for any query within the Markdown files. The search is not case-sensitive and supports partial word matches.
+- [] **Highlighting/previews**
 
-## Features
-- **Flexible Querying:** You can search for any query within the Markdown files. The search is not case-sensitive and supports partial word matches.
-- **Highlighting:** Search results are intelligently highlighted, making it easy to spot the relevant information at a glance.
 
 ## Usage
 
 ### Indexing
-Before searching, you need to index the Markdown files. Use the `--index` flag along with the directory path to initiate indexing.
-You can index as many directories as you wish
+Before searching, you need to index the Markdown files. Use the `-index` flag along with the directory path to initiate indexing.
 
 ```bash
-python3 sik.py --index -d /path/to/directory
-
-or ./sik.py --index -d /path/to/directory
+sik -index </path/to/directory/to/index>
 ```
 
 ### Searching
-Once indexed, you can search for queries within the Markdown files. Provide your query using the `-q` or `--query` flag.
-If you have more than one index, you'll be prompted to pick one
+Once indexed, you can search your notes by providing the `-b` flag, this will start a webserver at port `8990`.
+You can search through your data at this page
 ```bash
-python3 sik.py -q <random_query>
+sik -b
+
+# You can run it in the background with `sik -b &`
 ```
+- You don't have to restart the webserver to re-index your information
 
-## GUI
 
-Sik now has a gui version.
-It does still depend on the sik cli version to handle the searching and indexing functionality
-
-### Usage
-Currently you have to build it from source.
-
-```sh
-cd sik
-npm tauri dev
-# This will spin up the development server
-#or build application using
-npm tauri build
-```
-
+> You can always check the help `sik -h`
 
 ## Contributing
 This project is open for contributions!
 Feel free to fork the repository, make improvements, and submit pull requests.
 
 ## License
-This project is licensed under the MIT License, allowing you to use, modify, and distribute the code for both commercial and non-commercial purposes. See the [LICENSE](./LICENSE) file for more details.
+See the [LICENSE](./LICENSE) file for more details.
 
 
 > [!NOTE]
