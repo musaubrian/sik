@@ -62,7 +62,7 @@ func main() {
 	}
 
 	if browse {
-		s, err := server.Bootstrap("8990")
+		s, err := serverBootstrap()
 		if err != nil {
 			slog.Error(err.Error())
 			return
@@ -70,4 +70,18 @@ func main() {
 		s.Start()
 	}
 
+}
+
+func serverBootstrap() (*server.Server, error) {
+	base, err := utils.GetSikBase()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get sik base: %w", err)
+	}
+
+	index, err := core.LoadIndex(utils.GetIndexLocation(base))
+	if err != nil {
+		return nil, fmt.Errorf("failed to load index: %w", err)
+	}
+
+	return server.New(index), nil
 }

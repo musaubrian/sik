@@ -33,20 +33,6 @@ func (s *Server) WithPort(port string) *Server {
 	return s
 }
 
-func Bootstrap(port string) (*Server, error) {
-	base, err := utils.GetSikBase()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get sik base: %w", err)
-	}
-
-	index, err := core.LoadIndex(utils.GetIndexLocation(base))
-	if err != nil {
-		return nil, fmt.Errorf("failed to load index: %w", err)
-	}
-
-	return New(index).WithPort(port), nil
-}
-
 func (s *Server) Start() {
 	http.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		w.Write(html)
