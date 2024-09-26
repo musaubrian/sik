@@ -129,7 +129,6 @@
         const data = await response.json()
         if (response.ok) {
           resultsContainer.innerHTML = ''
-          console.log(data)
 
           if (data.length === 0) {
             const noResults = document.createElement('div')
