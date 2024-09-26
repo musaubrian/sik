@@ -58,6 +58,4 @@ Feel free to fork the repository, make improvements, and submit pull requests.
 See the [LICENSE](./LICENSE) file for more details.
 
 
-> [!NOTE]
->
 > Inspired by [seroost](https://github.com/tsoding/seroost)
