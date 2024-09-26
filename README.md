@@ -28,8 +28,6 @@ cd sik
 go build -o sik ./cmd
 ```
 
-or, get it from the [releases](https://github.com/musaubrian/sik/releases/latest)
-
 ### Indexing
 Before searching, you need to index the Markdown files. Use the `-index` flag along with the directory path to initiate indexing.
 
