@@ -1,11 +1,9 @@
-package main
+package utils
 
-import (
-	"testing"
-)
+import "testing"
 
 func TestGetSikBase(t *testing.T) {
-	_, err := getSikBase()
+	_, err := GetSikBase()
 
 	if err != nil {
 		t.Fatalf("Expected <nil> got <%v>", err)
@@ -26,7 +24,7 @@ func TestTokenizing(t *testing.T) {
 	}
 
 	for _, tt := range multiWords {
-		multiToken := tokenizeContent(tt.text)
+		multiToken := TokenizeContent(tt.text)
 		if len(multiToken) != tt.expectedLen {
 			t.Errorf("Expected tokenized content to be %d, Got: %d", tt.expectedLen, len(multiToken))
 		}
@@ -47,7 +45,7 @@ func TestIgnore(t *testing.T) {
 	}
 
 	for _, tt := range cases {
-		if got := ignore(tt.dir); got != tt.want {
+		if got := Ignore(tt.dir); got != tt.want {
 			t.Errorf("ignore(%v) -> %v; Expected %v", tt.dir, got, tt.want)
 		}
 	}

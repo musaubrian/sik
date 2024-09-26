@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"os"
@@ -10,17 +10,17 @@ import (
 	"github.com/kljensen/snowball"
 )
 
-func tokenizeContent(content string) []string {
+func TokenizeContent(content string) []string {
 	return strings.FieldsFunc(content, func(r rune) bool {
 		return !unicode.IsLetter(r) && !unicode.IsNumber(r)
 	})
 }
 
-func stemMult(words []string) ([]string, error) {
+func StemMult(words []string) ([]string, error) {
 	result := []string{}
 
 	for _, word := range words {
-		stemmed, err := stemm(word)
+		stemmed, err := Stemm(word)
 		if err != nil {
 			return result, err
 		}
@@ -30,11 +30,11 @@ func stemMult(words []string) ([]string, error) {
 	return result, nil
 }
 
-func stemm(word string) (string, error) {
+func Stemm(word string) (string, error) {
 	return snowball.Stem(word, "english", false)
 }
 
-func getSikBase() (string, error) {
+func GetSikBase() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
@@ -44,11 +44,11 @@ func getSikBase() (string, error) {
 	return base, nil
 }
 
-func getIndexLocation(base string) string {
+func GetIndexLocation(base string) string {
 	return path.Join(base, "index.sik")
 }
 
-func ignore(dir string) bool {
+func Ignore(dir string) bool {
 	ignoreList := []string{".git", "node_modules", ".venv"}
 	return slices.Contains(ignoreList, dir)
 }

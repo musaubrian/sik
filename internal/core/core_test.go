@@ -1,17 +1,19 @@
-package main
+package core
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestReadMarkdown(t *testing.T) {
 	testPaths := []struct {
 		path string
 		want bool
 	}{
-		{path: "test_dir/basics.md", want: true},
-		{path: "test_dir/project.md", want: true},
+		{path: "../test_src/basics.md", want: true},
+		{path: "../test_src/project.md", want: true},
 	}
 
-	res, err := readMarkdown("./test_dir")
+	res, err := ReadMarkdown("../test_src")
 	if err != nil {
 		t.Fatalf("Expected <nil>, got <%v>", err)
 	}
@@ -25,25 +27,25 @@ func TestReadMarkdown(t *testing.T) {
 }
 
 func TestCreateIndex(t *testing.T) {
-	res, _ := readMarkdown("./test_dir")
+	res, _ := ReadMarkdown("./../test_src")
 
-	_, err := createIndex(res)
+	_, err := CreateIndex(res)
 	if err != nil {
 		t.Fatalf("Expected <nil> got <%s>", err)
 	}
 }
 
 func TestIndex(t *testing.T) {
-	res, _ := readMarkdown("./test_dir")
+	res, _ := ReadMarkdown("../test_src")
 
-	index, _ := createIndex(res)
+	index, _ := CreateIndex(res)
 
 	singleOccurrenceWords := []struct {
 		word string
 		file string
 	}{
-		{"basic", "test_dir/basics.md"},
-		{"brief", "test_dir/project.md"},
+		{"basic", "../test_src/basics.md"},
+		{"brief", "../test_src/project.md"},
 	}
 
 	for _, tt := range singleOccurrenceWords {
@@ -60,8 +62,8 @@ func TestIndex(t *testing.T) {
 		word string
 		file string
 	}{
-		{"stuff", "test_dir/basics.md"},
-		{"featur", "test_dir/project.md"},
+		{"stuff", "../test_src/basics.md"},
+		{"featur", "../test_src/project.md"},
 	}
 
 	for _, tt := range multiOccurenceWords {

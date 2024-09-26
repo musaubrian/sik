@@ -1,44 +1,58 @@
-package main
+package engine
 
 import (
 	"fmt"
-	"log/slog"
 	"math"
 	"strings"
+
+	"github.com/musaubrian/sik/internal/core"
+	"github.com/musaubrian/sik/internal/utils"
 )
 
-const MAX_DISTANCE = 10 // How far in either direction to check for words
+const MaxProximityDistance = 10
 
-func search(query string, index Index) ([]string, error) {
-	// var error error
-
-	tContent := tokenizeContent(query)
-	if len(tContent) == 1 {
-		return simpleSearch(tContent[0], index)
-
-	}
-
-	results, err := phraseSearch(tContent, index)
-	if err != nil {
-		slog.Error(err.Error())
-		// error = fmt.Errorf("[phrase_search]: %v", err)
-	}
-
-	if len(results) == 0 {
-		return proximitySearch(tContent, index)
-	}
-
-	return results, nil
+type Engine struct {
+	index                core.Index
+	maxProximityDistance int
 }
 
-func simpleSearch(query string, index Index) ([]string, error) {
-	stemmed, err := stemm(query)
+func New(index core.Index) *Engine {
+	return &Engine{
+		index:                index,
+		maxProximityDistance: MaxProximityDistance,
+	}
+}
+
+func (se *Engine) Search(query string) ([]string, error) {
+	tokens := utils.TokenizeContent(query)
+	if len(tokens) == 1 {
+		return se.simpleSearch(tokens[0])
+
+	}
+
+	phraseResults, err := se.phraseSearch(tokens)
+	if err != nil {
+		return nil, fmt.Errorf("[phrase_search]: %v", err)
+	}
+	if len(phraseResults) > 0 {
+		return phraseResults, nil
+	}
+
+	proximityResults, err := se.proximitySearch(tokens)
+	if err != nil {
+		return nil, fmt.Errorf("[proximity_search]: %v", err)
+	}
+	return proximityResults, nil
+}
+
+func (se *Engine) simpleSearch(query string) ([]string, error) {
+	stemmed, err := utils.Stemm(query)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to stemm word: %v", err)
 	}
 
 	results := []string{}
-	for k, meta := range index {
+	for k, meta := range se.index {
 		if strings.Contains(k, stemmed) {
 			for path := range meta {
 				results = append(results, path)
@@ -49,17 +63,17 @@ func simpleSearch(query string, index Index) ([]string, error) {
 	return results, nil
 }
 
-func phraseSearch(phrase []string, index Index) ([]string, error) {
+func (se *Engine) phraseSearch(phrase []string) ([]string, error) {
 	res := []string{}
-	set := []FileMeta{}
+	set := []core.FileMeta{}
 
-	stemmedPhrase, err := stemMult(phrase)
+	stemmedPhrase, err := utils.StemMult(phrase)
 	if err != nil {
 		return res, fmt.Errorf("Could not stemm words: %v", err)
 	}
 
 	for _, word := range stemmedPhrase {
-		if meta, found := index[word]; found {
+		if meta, found := se.index[word]; found {
 			set = append(set, meta)
 		} else {
 			return res, nil
@@ -69,7 +83,7 @@ func phraseSearch(phrase []string, index Index) ([]string, error) {
 	commonDocs := intersectAll(set)
 
 	for doc := range commonDocs {
-		if wordsAppearInSequence(doc, stemmedPhrase, index) {
+		if wordsAppearInSequence(doc, stemmedPhrase, se.index) {
 			res = append(res, doc)
 		}
 	}
@@ -77,18 +91,18 @@ func phraseSearch(phrase []string, index Index) ([]string, error) {
 	return res, nil
 }
 
-func proximitySearch(query []string, index Index) ([]string, error) {
+func (se *Engine) proximitySearch(query []string) ([]string, error) {
 	finalResult := []string{}
-	resultsSet := []FileMeta{}
+	resultsSet := []core.FileMeta{}
 
-	stemmedQuery, err := stemMult(query)
+	stemmedQuery, err := utils.StemMult(query)
 	if err != nil {
 		return finalResult, fmt.Errorf("Could not stemm words: %v", err)
 	}
 
 	for _, word := range stemmedQuery {
 
-		if fileMeta, ok := index[word]; ok {
+		if fileMeta, ok := se.index[word]; ok {
 			resultsSet = append(resultsSet, fileMeta)
 		} else {
 			return finalResult, nil
@@ -98,7 +112,7 @@ func proximitySearch(query []string, index Index) ([]string, error) {
 	commonDocs := intersectAll(resultsSet)
 
 	for doc := range commonDocs {
-		if wordsInProximity(doc, stemmedQuery, index) {
+		if wordsInProximity(doc, stemmedQuery, se.index, se.maxProximityDistance) {
 			finalResult = append(finalResult, doc)
 		}
 
@@ -106,7 +120,7 @@ func proximitySearch(query []string, index Index) ([]string, error) {
 	return finalResult, nil
 }
 
-func intersectAll(resultSets []FileMeta) map[string]struct{} {
+func intersectAll(resultSets []core.FileMeta) map[string]struct{} {
 	commonDocs := make(map[string]struct{})
 	if len(resultSets) == 0 {
 		return commonDocs
@@ -126,7 +140,7 @@ func intersectAll(resultSets []FileMeta) map[string]struct{} {
 	return commonDocs
 }
 
-func wordsAppearInSequence(doc string, queryWords []string, index Index) bool {
+func wordsAppearInSequence(doc string, queryWords []string, index core.Index) bool {
 	firstWord := queryWords[0]
 	firstWordPositions := index[firstWord][doc]
 
@@ -138,7 +152,6 @@ func wordsAppearInSequence(doc string, queryWords []string, index Index) bool {
 			nextWordPositions := index[nextWord][doc]
 			expectedPos := startPos + i
 
-			// Check if any of the positions match the expected position
 			if !containsPosition(nextWordPositions, expectedPos) {
 				matched = false
 				break
@@ -152,7 +165,7 @@ func wordsAppearInSequence(doc string, queryWords []string, index Index) bool {
 	return false
 }
 
-func wordsInProximity(doc string, words []string, index Index) bool {
+func wordsInProximity(doc string, words []string, index core.Index, maxDistance int) bool {
 	wordPositions := make([][]int, len(words))
 	for i, word := range words {
 		if pos, ok := index[word][doc]; ok {
@@ -165,7 +178,7 @@ func wordsInProximity(doc string, words []string, index Index) bool {
 	for i := 0; i < len(wordPositions)-1; i++ {
 		for _, pos1 := range wordPositions[i] {
 			for _, pos2 := range wordPositions[i+1] {
-				if math.Abs(float64(pos1)-float64(pos2)) <= float64(MAX_DISTANCE) {
+				if math.Abs(float64(pos1)-float64(pos2)) <= float64(maxDistance) {
 					return true
 				}
 			}
