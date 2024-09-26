@@ -1,4 +1,4 @@
-package mainsik
+package main
 
 import (
 	"flag"

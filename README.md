@@ -9,14 +9,23 @@ Sik allows you to search through Markdown files within a directory and quickly f
 
 ## TODO:
 - [x] **Flexible Querying(WIP):** You can search for any query within the Markdown files. The search is not case-sensitive and supports partial word matches.
-- [] **Highlighting/previews**
+- [ ] **Highlighting/previews**
 
 
 ## Usage
 ### Installation
 
+Recommended:
 ```sh
 go install github.com/musaubrian/sik/cmd@latest
+```
+
+Manual:
+```sh
+git clone https://github.com/musaubrian/sik
+
+cd sik
+go build -o sik ./cmd
 ```
 
 ### Indexing
