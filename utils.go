@@ -16,8 +16,22 @@ func tokenizeContent(content string) []string {
 	})
 }
 
+func stemMult(words []string) ([]string, error) {
+	result := []string{}
+
+	for _, word := range words {
+		stemmed, err := stemm(word)
+		if err != nil {
+			return result, err
+		}
+
+		result = append(result, stemmed)
+	}
+	return result, nil
+}
+
 func stemm(word string) (string, error) {
-	return snowball.Stem(word, "english", true)
+	return snowball.Stem(word, "english", false)
 }
 
 func getSikBase() (string, error) {

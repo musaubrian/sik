@@ -1,6 +1,8 @@
 package main
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestGetSikBase(t *testing.T) {
 	_, err := getSikBase()
@@ -11,7 +13,24 @@ func TestGetSikBase(t *testing.T) {
 }
 
 func TestTokenizing(t *testing.T) {
+	multiWords := []struct {
+		text        string
+		expectedLen int
+	}{
+		{"hello there, how are you bruv", 6},
+		{"no pnctuation", 2},
+		{"So, this; will remove : punctuation ?", 5},
+		{"This + 90 equal 10294 .", 4},
+		{"one", 1},
+		{": , . > | *", 0},
+	}
 
+	for _, tt := range multiWords {
+		multiToken := tokenizeContent(tt.text)
+		if len(multiToken) != tt.expectedLen {
+			t.Errorf("Expected tokenized content to be %d, Got: %d", tt.expectedLen, len(multiToken))
+		}
+	}
 }
 
 func TestIgnore(t *testing.T) {

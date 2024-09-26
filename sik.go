@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-type FileMeta map[string]uint16 // [filepath]no. of occurences
+type FileMeta map[string][]int // [filepath]word positions
 
 type Index map[string]FileMeta
 
@@ -72,22 +72,6 @@ func main() {
 
 }
 
-func search(query string, index Index) ([]FileMeta, error) {
-	results := []FileMeta{}
-	stemmedWord, err := stemm(query)
-	if err != nil {
-		return results, err
-	}
-
-	for k, meta := range index {
-		if strings.Contains(k, stemmedWord) { // Slightly fuzzy like
-			results = append(results, meta)
-		}
-	}
-
-	return results, nil
-}
-
 func saveIndex(basepath string, index Index) error {
 	json, err := json.Marshal(index)
 	if err != nil {
@@ -106,18 +90,19 @@ func createIndex(fileContents map[string]string) (Index, error) {
 	index := make(Index)
 	for name, contents := range fileContents {
 		tokenizedContents := tokenizeContent(contents)
-		for _, v := range tokenizedContents {
-			v, err := stemm(v)
+		for pos, v := range tokenizedContents {
+			stemmedWord, err := stemm(v)
 			if err != nil {
 				return index, fmt.Errorf("Could not stem word: %v", err)
 			}
-			if len(v) == 0 {
+
+			if len(stemmedWord) == 0 {
 				continue
 			}
-			if meta, ok := index[v]; ok {
-				meta[name] += 1
+			if meta, ok := index[stemmedWord]; ok {
+				meta[name] = append(meta[name], pos)
 			} else {
-				index[v] = FileMeta{name: 1}
+				index[stemmedWord] = FileMeta{name: []int{pos}}
 			}
 		}
 	}

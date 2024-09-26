@@ -50,8 +50,8 @@ func TestIndex(t *testing.T) {
 		if fileMeta, exists := index[tt.word]; !exists {
 			t.Errorf("Expected word '%s' to be in the index", tt.word)
 		} else {
-			if count, fileExists := fileMeta[tt.file]; !fileExists || count != 1 {
-				t.Errorf("Expected word '%s' to appear once in '%s', got %d", tt.word, tt.file, count)
+			if pos, exists := fileMeta[tt.file]; !exists || len(pos) != 1 {
+				t.Errorf("Expected word <%s> to appear once in <%s>, Got %d", tt.word, tt.file, len(pos))
 			}
 		}
 	}
@@ -68,26 +68,9 @@ func TestIndex(t *testing.T) {
 		if fileMeta, exists := index[tt.word]; !exists {
 			t.Errorf("Expected word '%s' to be in the index", tt.word)
 		} else {
-			if count, fileExists := fileMeta[tt.file]; !fileExists || count <= 1 {
-				t.Errorf("Expected word '%s' to appear once in '%s', got %d", tt.word, tt.file, count)
+			if pos, exists := fileMeta[tt.file]; !exists || len(pos) <= 1 {
+				t.Errorf("Expected word '%s' to appear once in '%s', got %d", tt.word, tt.file, len(pos))
 			}
-		}
-	}
-}
-
-func TestSearch(t *testing.T) {
-	res, _ := readMarkdown("./test_dir")
-	in, _ := createIndex(res)
-
-	words := []string{"duplicate", "features", "description"}
-
-	for _, word := range words {
-		searchRes, err := search(word, in)
-		if err != nil {
-			t.Fatalf("Expected <nil>, Got <%s>", err)
-		}
-		if len(searchRes) == 0 {
-			t.Fatalf("Expected 1 result, got <%d>", len(searchRes))
 		}
 	}
 }
