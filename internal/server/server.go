@@ -10,7 +10,6 @@ import (
 
 	"github.com/musaubrian/sik/internal/core"
 	"github.com/musaubrian/sik/internal/engine"
-	"github.com/musaubrian/sik/internal/utils"
 )
 
 //go:embed html/index.html
