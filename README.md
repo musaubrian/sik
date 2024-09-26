@@ -1,6 +1,6 @@
 # sik
 
-> [!WARNING]
+> [!IMPORTANT]
 >
 > The project was rewritten to use Go and a **proper-ish* indexing method
 > If you would still like to use the old python version, it will always be available at the [py](https://github.com/musaubrian/sik/tree/py) branch.
@@ -8,11 +8,27 @@
 Sik allows you to search through Markdown files within a directory and quickly find the information you need.
 
 ## TODO:
-- [] **Flexible Querying(WIP):** You can search for any query within the Markdown files. The search is not case-sensitive and supports partial word matches.
-- [] **Highlighting/previews**
+- [x] **Flexible Querying(WIP):** You can search for any query within the Markdown files. The search is not case-sensitive and supports partial word matches.
+- [ ] **Highlighting/previews**
 
 
 ## Usage
+### Installation
+
+Recommended:
+```sh
+go install github.com/musaubrian/sik/cmd@latest
+```
+
+Manual:
+```sh
+git clone https://github.com/musaubrian/sik
+
+cd sik
+go build -o sik ./cmd
+```
+
+or, get it from the [releases](https://github.com/musaubrian/sik/releases/latest)
 
 ### Indexing
 Before searching, you need to index the Markdown files. Use the `-index` flag along with the directory path to initiate indexing.
