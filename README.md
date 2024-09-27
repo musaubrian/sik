@@ -17,7 +17,7 @@ Sik allows you to search through Markdown files within a directory and quickly f
 
 Recommended:
 ```sh
-go install github.com/musaubrian/sik/cmd@latest
+go install github.com/musaubrian/sik/cmd/sik@latest
 ```
 
 Manual:
@@ -25,7 +25,7 @@ Manual:
 git clone https://github.com/musaubrian/sik
 
 cd sik
-go build -o sik ./cmd
+go build ./cmd/sik
 ```
 
 ### Indexing
