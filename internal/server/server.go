@@ -10,6 +10,7 @@ import (
 
 	"github.com/musaubrian/sik/internal/core"
 	"github.com/musaubrian/sik/internal/engine"
+	"github.com/musaubrian/sik/internal/utils"
 )
 
 //go:embed html/index.html
@@ -37,6 +38,7 @@ func (s *Server) Start() {
 		w.Write(html)
 	})
 	http.HandleFunc("POST /search", s.handleSearch)
+	http.HandleFunc("GET /reload", s.handleReload)
 
 	slog.Info(fmt.Sprintf("Server running at localhost:%s", s.port))
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", s.port), nil))
@@ -64,4 +66,23 @@ func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unable to encode response", http.StatusInternalServerError)
 		return
 	}
+}
+
+func (s *Server) handleReload(w http.ResponseWriter, r *http.Request) {
+	base, err := utils.GetSikBase()
+	if err != nil {
+		msg := fmt.Errorf("Could not get Base: %v", err)
+		slog.Error(msg.Error())
+		http.Error(w, msg.Error(), http.StatusInternalServerError)
+		return
+	}
+	index, err := core.LoadIndex(utils.GetIndexLocation(base))
+	if err != nil {
+		msg := fmt.Errorf("Failed to load index: %v", err)
+		slog.Error(msg.Error())
+		http.Error(w, msg.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	s.engine = engine.New(index)
 }
