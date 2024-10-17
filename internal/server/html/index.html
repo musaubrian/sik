@@ -44,7 +44,7 @@
         display: inline-flex;
         justify-content: end;
         align-items: center;
-        padding: 1rem;
+        padding: 0.5rem;
       }
       .reload-container > button {
         background: transparent;
@@ -114,6 +114,7 @@
         }
       }
       @media (width <= 700px) {
+        .reload-container,
         input,
         .single-result {
           width: 90%;
@@ -123,14 +124,14 @@
   </head>
   <body>
     <div class="reload-container">
-      <button onclick="reloadIndex()">
+      <button id="reloadBtn" onclick="reloadIndex()">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
           stroke-width="1.5"
           stroke="currentColor"
-          style="width: 15px; height: 15px"
+          style="width: 10px; height: 10px"
         >
           <path
             stroke-linecap="round"
@@ -156,19 +157,32 @@
     const searchForm = document.getElementById("search");
     const resultsContainer = document.getElementById("results");
     const reloadText = document.getElementById("reloadText");
+    const reloadBtn = document.getElementById("reloadBtn");
 
     const reloadIndex = () => {
       fetch("/reload")
         .then((response) => {
           if (response.ok) {
+            reloadBtn.style.color = "green";
+            reloadBtn.style.fontWeight = "700";
             reloadText.innerHTML = "refreshed";
+            setTimeout(() => {
+              reloadText.innerHTML = "refresh index";
+              reloadBtn.style.removeProperty("color");
+              reloadBtn.style.removeProperty("font-weight");
+            }, 1000);
             return;
           } else {
+            reloadBtn.style.color = "red";
+            reloadBtn.style.fontWeight = "700";
             reloadText.innerHTML = "refresh failed: " + response.statusText;
           }
         })
         .catch((e) => {
-          reload.innerHTML = "Failed to refresh";
+          reloadBtn.style.color = "red";
+          reloadBtn.style.fontWeight = "700";
+          reloadText.innerHTML = "Failed to refresh";
+
           console.error("ERROR: ", e);
         });
     };
