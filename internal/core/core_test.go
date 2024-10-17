@@ -1,7 +1,10 @@
 package core
 
 import (
+	"log/slog"
 	"testing"
+
+	"github.com/musaubrian/sik/internal/utils"
 )
 
 func TestReadMarkdown(t *testing.T) {
@@ -49,7 +52,11 @@ func TestIndex(t *testing.T) {
 	}
 
 	for _, tt := range singleOccurrenceWords {
-		if fileMeta, exists := index[tt.word]; !exists {
+		stemmedWord, err := utils.Stemm(tt.word)
+		if err != nil {
+			slog.Error(err.Error())
+		}
+		if fileMeta, exists := index[stemmedWord]; !exists {
 			t.Errorf("Expected word '%s' to be in the index", tt.word)
 		} else {
 			if pos, exists := fileMeta[tt.file]; !exists || len(pos) != 1 {
@@ -63,11 +70,15 @@ func TestIndex(t *testing.T) {
 		file string
 	}{
 		{"stuff", "../test_src/basics.md"},
-		{"featur", "../test_src/project.md"},
+		{"feature", "../test_src/project.md"},
 	}
 
 	for _, tt := range multiOccurenceWords {
-		if fileMeta, exists := index[tt.word]; !exists {
+		stemmedWord, err := utils.Stemm(tt.word)
+		if err != nil {
+			slog.Error(err.Error())
+		}
+		if fileMeta, exists := index[stemmedWord]; !exists {
 			t.Errorf("Expected word '%s' to be in the index", tt.word)
 		} else {
 			if pos, exists := fileMeta[tt.file]; !exists || len(pos) <= 1 {
