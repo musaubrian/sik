@@ -3,13 +3,14 @@ package engine
 import (
 	"fmt"
 	"math"
+	"slices"
 	"strings"
 
 	"github.com/musaubrian/sik/internal/core"
 	"github.com/musaubrian/sik/internal/utils"
 )
 
-const MaxProximityDistance = 10
+const maxProximityDistance = 10
 
 type Engine struct {
 	index                core.Index
@@ -19,15 +20,27 @@ type Engine struct {
 func New(index core.Index) *Engine {
 	return &Engine{
 		index:                index,
-		maxProximityDistance: MaxProximityDistance,
+		maxProximityDistance: maxProximityDistance,
 	}
+}
+
+func removeDuplicates(in []string) []string {
+	clean := []string{}
+
+	for _, v := range in {
+		if !slices.Contains(clean, v) {
+			clean = append(clean, v)
+		}
+	}
+
+	return clean
 }
 
 func (se *Engine) Search(query string) ([]string, error) {
 	tokens := utils.TokenizeContent(query)
 	if len(tokens) == 1 {
-		return se.simpleSearch(tokens[0])
-
+		simpleSearchRes, err := se.simpleSearch(tokens[0])
+		return removeDuplicates(simpleSearchRes), err
 	}
 
 	phraseResults, err := se.phraseSearch(tokens)
@@ -35,14 +48,14 @@ func (se *Engine) Search(query string) ([]string, error) {
 		return nil, fmt.Errorf("[phrase_search]: %v", err)
 	}
 	if len(phraseResults) > 0 {
-		return phraseResults, nil
+		return removeDuplicates(phraseResults), nil
 	}
 
 	proximityResults, err := se.proximitySearch(tokens)
 	if err != nil {
 		return nil, fmt.Errorf("[proximity_search]: %v", err)
 	}
-	return proximityResults, nil
+	return removeDuplicates(proximityResults), nil
 }
 
 func (se *Engine) simpleSearch(query string) ([]string, error) {
