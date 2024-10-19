@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <title>Sik | MD</title>
+    <style>
+      :root {
+        font-family: system-ui, monospace;
+        color: #171717;
+        background-color: #f8fafc;
+        font-weight: 400;
+        font-size: 1.1rem;
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-text-size-adjust: 100%;
+      }
+
+      pre {
+        font-size: 0.9rem;
+        font-weight: 400;
+        background: #e2e8f0;
+        border-radius: 10px;
+        padding: 10px;
+        overflow: scroll;
+        overflow-x: auto;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+        line-height: 1.3em;
+      }
+
+      code {
+        -webkit-font-smoothing: antialiased;
+        -moz-font-feature-settings: "liga=1, dlig=1";
+        -ms-font-feature-settings: "liga", "dlig";
+        -webkit-font-feature-settings: "liga", "dlig";
+        -o-font-feature-settings: "liga", "dlig";
+        font-feature-settings: "liga", "dlig";
+        font-variant-ligatures: contextual;
+        font-family: monospace;
+        font-size: 0.9em;
+        line-height: 0;
+        background: #e2e8f0;
+        padding: 4px;
+        border-radius: 5px;
+      }
+      pre > code {
+        background: transparent;
+      }
+
+      pre::-webkit-scrollbar {
+        display: none;
+      }
+
+      blockquote {
+        margin: 1.5rem;
+        border-left: solid 2px;
+      }
+
+      blockquote p {
+        margin-left: 1rem;
+        margin-right: 1rem;
+      }
+
+      pre > code {
+        background: transparent;
+      }
+      table {
+        border-collapse: collapse;
+      }
+
+      th {
+        background-color: #e2e8f0;
+        color: black;
+        font-size: 600;
+        padding: 10px;
+      }
+
+      td,
+      th {
+        border: 1px solid black;
+        padding: 6px;
+        text-align: left;
+      }
+
+      tr:nth-child(even) {
+        background-color: #f1f5f9;
+      }
+
+      body {
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      #md-content {
+        width: 50%;
+      }
+      p {
+        text-wrap: pretty;
+      }
+
+      @media (width <= 700px) {
+        #md-content {
+          width: 90%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1 id="doc-name"></h1>
+    <div id="md-content"></div>
+  </body>
+  <script>
+    const h1 = document.getElementById("doc-name");
+    const mdContent = document.getElementById("md-content");
+
+    let params = new URLSearchParams(document.location.search);
+    let file = params.get("doc-url");
+
+    if (!file) {
+      h1.innerText = "No File to display";
+    } else {
+      h1.innerText = file.split("/").pop();
+      fetch(`/read-doc?url=${file}`)
+        .then((response) => {
+          if (!response.ok) {
+            console.log(response);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          mdContent.innerHTML = marked.parse(data);
+        })
+        .catch((e) => {
+          console.error("ERROR: ", e);
+        });
+    }
+  </script>
+</html>
