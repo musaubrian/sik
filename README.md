@@ -9,7 +9,9 @@ Sik allows you to search through Markdown files within a directory and quickly f
 
 ## TODO:
 - [x] **Flexible Querying(WIP):** You can search for any query within the Markdown files. The search is not case-sensitive and supports partial word matches.
-- [ ] **Highlighting/previews**
+- ~[ ] **Highlighting/previews**~
+- [x] Loads up the file directly in the browser, making it easier to view what you were searching for
+- [ ] Bundle up [marked](https://marked.js.org/) and make it completely local
 
 
 ## Usage
