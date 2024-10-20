@@ -96,29 +96,36 @@
         margin-bottom: 1rem;
       }
       .res-title {
+        width: 100%;
         display: inline-flex;
+        gap: 2rem;
         justify-content: space-between;
         align-items: center;
         cursor: pointer;
       }
-      @media (prefers-color-scheme: dark) {
-        :root {
-          color: #f6f6f6;
-          background-color: #0f172a;
-        }
-        .single-result {
-          background-color: #334155;
-        }
-        .res-head {
-          color: #e2e8f0;
-        }
+      .no-result {
+        width: 100%;
+        display: inline-flex;
+        align-items: center;
+        cursor: pointer;
       }
-      @media (width <= 700px) {
-        .reload-container,
-        input,
-        .single-result {
-          width: 90%;
-        }
+      .copy-file {
+        border: none;
+        background: none;
+        cursor: pointer;
+      }
+      a {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: black;
+        text-decoration: none;
+        transition: all 0.2s ease;
+      }
+
+      a:hover {
+        text-decoration: underline;
+        text-decoration-style: dotted;
+        color: blue;
       }
     </style>
   </head>
@@ -203,10 +210,10 @@
             const noResults = document.createElement("div");
             noResults.classList.add("single-result");
             noResults.innerHTML = `
-            <div class="res-title">
+            <div class="no-result">
                 <svg xmlns="http://www.w3.org/2000/svg" style="color: red;" width="30" height="30" viewBox="0 0 24 24"><path fill="currentColor" d="M12.002 1.999c5.523 0 10.001 4.478 10.001 10.002c0 .263-.01.524-.03.783a6.514 6.514 0 0 0-1.474-1.052a8.513 8.513 0 0 0-.233-1.733h-3.358c.032.336.057.676.073 1.021a6.471 6.471 0 0 0-1.49.296A18.74 18.74 0 0 0 15.4 10H8.605a18.969 18.969 0 0 0 .135 5h2.758c-.198.475-.34.977-.422 1.5H9.063c.598 2.215 1.601 3.735 2.654 3.97a6.52 6.52 0 0 0 1.066 1.502c-.258.02-.518.03-.781.03C6.478 22.002 2 17.524 2 12.001C2 6.477 6.478 1.999 12.002 1.999M7.51 16.501H4.787a8.532 8.532 0 0 0 4.095 3.41c-.523-.82-.954-1.846-1.27-3.015zM7.095 10H3.737l-.004.017a8.525 8.525 0 0 0-.233 1.984c0 1.056.193 2.067.545 3h3.173a20.847 20.847 0 0 1-.123-5m1.788-5.91l-.023.008A8.531 8.531 0 0 0 4.252 8.5H7.3c.313-1.752.86-3.278 1.583-4.41m3.119-.591l-.116.005C10.62 3.62 9.398 5.622 8.83 8.5h6.343c-.566-2.87-1.783-4.869-3.045-4.995zm3.12.59l.106.175c.67 1.112 1.178 2.572 1.475 4.237h3.048a8.533 8.533 0 0 0-4.338-4.29zM23 17.5a5.5 5.5 0 1 1-11 0a5.5 5.5 0 0 1 11 0M17.5 14a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 1 0v-4a.5.5 0 0 0-.5-.5m0 7.125a.625.625 0 1 0 0-1.25a.625.625 0 0 0 0 1.25"/></svg>
                 <h3 style="padding:1.3rem;font-size: 1.3rem;">
-                <b>:( <i>Could Not find a match</b></i></h3>
+                <b>:( <i>Could not find a match</b></i></h3>
             </div>
               `;
             resultsContainer.appendChild(noResults);
@@ -221,7 +228,12 @@
           <span><i>${data[i]}</i></span>
         </div>
         <div class="res-title">
-          <h2 onclick='clip("${data[i]}")'>${data[i].split("/").pop()}</h2>
+          <a href='/doc?doc-url=${data[i]}'>${data[i].split("/").pop()}</a>
+          <button class="copy-file" onClick="clip('${data[i]}')">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08M15.75 18.75v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5A3.375 3.375 0 0 0 6.375 7.5H5.25m11.9-3.664A2.251 2.251 0 0 0 15 2.25h-1.5a2.251 2.251 0 0 0-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 0 0-9-9Z" />
+            </svg>
+          </button>
         </div>
         `;
             resultsContainer.appendChild(fileElement);
