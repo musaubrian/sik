@@ -50,12 +50,24 @@ func (s *Server) Start() {
 	http.HandleFunc("GET /doc", func(w http.ResponseWriter, r *http.Request) {
 		markdHtml, err := www.ReadFile("www/markd.html")
 		if err != nil {
-			slog.Error(fmt.Sprintf("[/doc] Failed to get index.html: %v", err))
+			slog.Error(fmt.Sprintf("[/doc] Failed to get markd.html: %v", err))
 			http.Error(w, "Unable to get page", http.StatusInternalServerError)
 			return
 		}
 		w.Write(markdHtml)
 	})
+
+	http.HandleFunc("GET /js/markd.min.js", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json;charset=utf-8")
+		markMinJs, err := www.ReadFile("www/markd.min.js")
+		if err != nil {
+			slog.Error(fmt.Sprintf("[/markd.min.js] Failed to get markdjs: %v", err))
+			http.Error(w, "Unable to get js asset", http.StatusInternalServerError)
+			return
+		}
+		w.Write(markMinJs)
+	})
+
 	http.HandleFunc("POST /search", s.handleSearch)
 	http.HandleFunc("GET /reload", s.handleReload)
 	http.HandleFunc("GET /read-doc", s.handleReadDoc)
