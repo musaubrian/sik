@@ -116,50 +116,62 @@
   </head>
   <body>
     <h1 id="doc-name"></h1>
+    <button onclick="removeHits()">clear highlights</button>
     <div id="md-content"></div>
   </body>
   <script>
-const h1 = document.getElementById("doc-name");
-const mdContent = document.getElementById("md-content");
+    const h1 = document.getElementById("doc-name");
+    const mdContent = document.getElementById("md-content");
 
-let params = new URLSearchParams(document.location.search);
-let file = params.get("doc-url");
-let hit = params.get("hit");
+    const url = new URL(window.location);
+    const params = url.searchParams;
+    let file = params.get("doc-url");
+    let hit = params.get("hit");
 
-if (!file) {
-    h1.innerText = "No File to display";
-} else {
-    h1.innerText = file.split("/").pop();
-    fetch(`/read-doc?url=${file}`)
+    if (!file) {
+      h1.innerText = "No File to display";
+    } else {
+      h1.innerText = file.split("/").pop();
+      fetchContent();
+    }
+
+    function fetchContent() {
+      fetch(`/read-doc?url=${file}`)
         .then((response) => {
-            if (!response.ok) {
-                h1.innerText = "An error occured";
-                console.log(response);
-            }
-            return response.json();
+          if (!response.ok) {
+            h1.innerText = "An error occurred";
+            console.log(response);
+          }
+          return response.json();
         })
         .then((data) => {
-            mdContent.innerHTML = marked.parse(data);
-            if (hit){
-              mdContent.innerHTML = highlightHits(mdContent, hit);
-            }
+          mdContent.innerHTML = marked.parse(data);
+          if (hit){
+            mdContent.innerHTML = highlightHits(mdContent, hit);
+          }
         })
         .catch((e) => {
-            console.error("ERROR: ", e);
+          console.error("ERROR: ", e);
         });
-}
+    }
 
-function highlightHits(source, words){
-  let sourceText = source.innerHTML;
-  const wordArray = words.split(" ");
+    function highlightHits(source, words){
+      let sourceText = source.innerHTML;
+      const wordArray = words.split(" ");
 
-  wordArray.forEach(word => {
-    const reg = new RegExp(`(${word})`, "gi");
-    sourceText = sourceText.replace(reg, `<span class="highlight">${word}</span>`);
-  })
+      wordArray.forEach(word => {
+        const reg = new RegExp(`(${word})`, "gi");
+        sourceText = sourceText.replace(reg, `<span class="highlight">${word}</span>`);
+      })
 
-  return sourceText;
-}
+      return sourceText;
+    }
 
-  </script>
+    async function removeHits(){
+      params.delete("hit")
+      history.replaceState(null, '', url.toString());
+
+      fetchContent()
+    }
+</script>
 </html>
