@@ -4,13 +4,15 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/musaubrian/logr"
 	"github.com/musaubrian/sik/internal/utils"
 )
+
+var Logging = logr.New()
 
 type FileMeta map[string][]int // [filepath]word positions
 type Index map[string]FileMeta
@@ -24,7 +26,7 @@ func ReadMarkdown(dir string) (map[string]string, error) {
 		}
 
 		if d.IsDir() && utils.Ignore(d.Name()) {
-			slog.Info("SKIPPING " + d.Name())
+			Logging.Info("SKIPPING " + d.Name())
 			return filepath.SkipDir
 		}
 

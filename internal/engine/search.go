@@ -93,7 +93,7 @@ func (se *Engine) phraseSearch(phrase []string) ([]string, error) {
 		}
 	}
 
-	commonDocs := intersectAll(set)
+	commonDocs := mergeAll(set)
 
 	for doc := range commonDocs {
 		if wordsAppearInSequence(doc, stemmedPhrase, se.index) {
@@ -122,7 +122,7 @@ func (se *Engine) proximitySearch(query []string) ([]string, error) {
 		}
 	}
 
-	commonDocs := intersectAll(resultsSet)
+	commonDocs := mergeAll(resultsSet)
 
 	for doc := range commonDocs {
 		if wordsInProximity(doc, stemmedQuery, se.index, se.maxProximityDistance) {
@@ -133,7 +133,7 @@ func (se *Engine) proximitySearch(query []string) ([]string, error) {
 	return finalResult, nil
 }
 
-func intersectAll(resultSets []core.FileMeta) map[string]struct{} {
+func mergeAll(resultSets []core.FileMeta) map[string]struct{} {
 	commonDocs := make(map[string]struct{})
 	if len(resultSets) == 0 {
 		return commonDocs

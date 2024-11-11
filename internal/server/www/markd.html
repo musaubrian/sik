@@ -109,36 +109,69 @@
           width: 90%;
         }
       }
+    .highlight {
+     background-color: #fed7aa;
+    }
     </style>
   </head>
   <body>
     <h1 id="doc-name"></h1>
+    <button onclick="removeHits()">clear highlights</button>
     <div id="md-content"></div>
   </body>
   <script>
     const h1 = document.getElementById("doc-name");
     const mdContent = document.getElementById("md-content");
 
-    let params = new URLSearchParams(document.location.search);
+    const url = new URL(window.location);
+    const params = url.searchParams;
     let file = params.get("doc-url");
+    let hit = params.get("hit");
 
     if (!file) {
       h1.innerText = "No File to display";
     } else {
       h1.innerText = file.split("/").pop();
+      fetchContent();
+    }
+
+    function fetchContent() {
       fetch(`/read-doc?url=${file}`)
         .then((response) => {
           if (!response.ok) {
+            h1.innerText = "An error occurred";
             console.log(response);
           }
           return response.json();
         })
         .then((data) => {
           mdContent.innerHTML = marked.parse(data);
+          if (hit){
+            mdContent.innerHTML = highlightHits(mdContent, hit);
+          }
         })
         .catch((e) => {
           console.error("ERROR: ", e);
         });
     }
-  </script>
+
+    function highlightHits(source, words){
+      let sourceText = source.innerHTML;
+      const wordArray = words.split(" ");
+
+      wordArray.forEach(word => {
+        const reg = new RegExp(`(${word})`, "gi");
+        sourceText = sourceText.replace(reg, `<span class="highlight">${word}</span>`);
+      })
+
+      return sourceText;
+    }
+
+    async function removeHits(){
+      params.delete("hit")
+      history.replaceState(null, '', url.toString());
+
+      fetchContent()
+    }
+</script>
 </html>

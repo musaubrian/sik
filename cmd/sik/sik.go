@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -30,41 +29,41 @@ func main() {
 
 	base, err := utils.GetSikBase()
 	if err != nil {
-		slog.Error(err.Error())
+		core.Logging.Error(err.Error())
 		return
 	}
 
 	if _, err := os.Stat(base); err != nil {
 		if err := os.Mkdir(base, 0755); err != nil {
-			slog.Error(err.Error())
+			core.Logging.Error(err.Error())
 			return
 		}
-		slog.Info(fmt.Sprintf("Created %s", filepath.Base(base)))
+		core.Logging.Info(fmt.Sprintf("Created %s", filepath.Base(base)))
 	}
 
 	if len(indexDir) > 0 {
 		contents, err := core.ReadMarkdown(indexDir)
 		if err != nil {
-			slog.Error(err.Error())
+			core.Logging.Error(err.Error())
 			return
 		}
 
 		in, err := core.CreateIndex(contents)
 		if err != nil {
-			slog.Error(err.Error())
+			core.Logging.Error(err.Error())
 			return
 		}
 		if err := core.SaveIndex(base, in); err != nil {
-			slog.Error(err.Error())
+			core.Logging.Error(err.Error())
 			return
 		}
-		slog.Info("Created Index")
+		core.Logging.Info("Created Index")
 	}
 
 	if browse {
 		s, err := serverBootstrap()
 		if err != nil {
-			slog.Error(err.Error())
+			core.Logging.Error(err.Error())
 			return
 		}
 		s.Start()
@@ -83,5 +82,5 @@ func serverBootstrap() (*server.Server, error) {
 		return nil, fmt.Errorf("failed to load index: %w", err)
 	}
 
-	return server.New(index), nil
+	return server.New(index).WithPort("4000"), nil
 }
