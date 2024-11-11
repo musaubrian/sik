@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"log/slog"
 	"net/http"
 	"os"
 	"strings"
@@ -41,7 +40,7 @@ func (s *Server) Start() {
 	http.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		indexHtml, err := www.ReadFile("www/index.html")
 		if err != nil {
-			slog.Error(fmt.Sprintf("[/] Failed to get index.html: %v", err))
+			core.Logging.Error(fmt.Sprintf("[/] Failed to get index.html: %v", err))
 			http.Error(w, "Unable to get page", http.StatusInternalServerError)
 			return
 		}
@@ -50,7 +49,7 @@ func (s *Server) Start() {
 	http.HandleFunc("GET /doc", func(w http.ResponseWriter, r *http.Request) {
 		markdHtml, err := www.ReadFile("www/markd.html")
 		if err != nil {
-			slog.Error(fmt.Sprintf("[/doc] Failed to get markd.html: %v", err))
+			core.Logging.Error(fmt.Sprintf("[/doc] Failed to get markd.html: %v", err))
 			http.Error(w, "Unable to get page", http.StatusInternalServerError)
 			return
 		}
@@ -61,7 +60,7 @@ func (s *Server) Start() {
 		w.Header().Set("Content-Type", "application/json;charset=utf-8")
 		markMinJs, err := www.ReadFile("www/markd.min.js")
 		if err != nil {
-			slog.Error(fmt.Sprintf("[/markd.min.js] Failed to get markdjs: %v", err))
+			core.Logging.Error(fmt.Sprintf("[/markd.min.js] Failed to get markdjs: %v", err))
 			http.Error(w, "Unable to get js asset", http.StatusInternalServerError)
 			return
 		}
@@ -72,7 +71,7 @@ func (s *Server) Start() {
 	http.HandleFunc("GET /reload", s.handleReload)
 	http.HandleFunc("GET /read-doc", s.handleReadDoc)
 
-	slog.Info(fmt.Sprintf("Server running at localhost:%s", s.port))
+	core.Logging.Info(fmt.Sprintf("Server running at localhost:%s", s.port))
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", s.port), nil))
 }
 
@@ -80,7 +79,7 @@ func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	if err := r.ParseMultipartForm(1 << 20); err != nil {
-		slog.Error(err.Error())
+		core.Logging.Error(err.Error())
 		http.Error(w, "Unable to parse form", http.StatusBadRequest)
 		return
 	}
@@ -89,7 +88,7 @@ func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 
 	res, err := s.engine.Search(query)
 	if err != nil {
-		slog.Error(err.Error())
+		core.Logging.Error(err.Error())
 		http.Error(w, "Could not search for query", http.StatusInternalServerError)
 		return
 	}
@@ -104,14 +103,14 @@ func (s *Server) handleReload(w http.ResponseWriter, r *http.Request) {
 	base, err := utils.GetSikBase()
 	if err != nil {
 		msg := fmt.Errorf("Could not get Base: %v", err)
-		slog.Error(msg.Error())
+		core.Logging.Error(msg.Error())
 		http.Error(w, msg.Error(), http.StatusInternalServerError)
 		return
 	}
 	index, err := core.LoadIndex(utils.GetIndexLocation(base))
 	if err != nil {
 		msg := fmt.Errorf("Failed to load index: %v", err)
-		slog.Error(msg.Error())
+		core.Logging.Error(msg.Error())
 		http.Error(w, msg.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -126,7 +125,7 @@ func (s *Server) handleReadDoc(w http.ResponseWriter, r *http.Request) {
 	f, err := os.Open(fileurl)
 	if err != nil {
 		msg := fmt.Errorf("Failed to open file: %v", err)
-		slog.Error(msg.Error())
+		core.Logging.Error(msg.Error())
 		http.Error(w, msg.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -139,7 +138,7 @@ func (s *Server) handleReadDoc(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := scanner.Err(); err != nil {
 		msg := fmt.Errorf("Failed to read Files contents: %v", err)
-		slog.Error(msg.Error())
+		core.Logging.Error(msg.Error())
 		http.Error(w, msg.Error(), http.StatusInternalServerError)
 		return
 	}
