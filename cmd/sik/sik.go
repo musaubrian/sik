@@ -82,5 +82,5 @@ func serverBootstrap() (*server.Server, error) {
 		return nil, fmt.Errorf("failed to load index: %w", err)
 	}
 
-	return server.New(index).WithPort("4000"), nil
+	return server.New(index), nil
 }
