@@ -50,6 +50,10 @@ sik -b
 
 > You can always check the help `sik -h`
 
+### Dev mode
+If you wish to make changes and already have an instance running,
+prefix run command with `SIK_DEV=<anything_you_wish>)`
+
 ## Contributing
 This project is open for contributions!
 Feel free to fork the repository, make improvements, and submit pull requests.
