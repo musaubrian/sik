@@ -71,6 +71,20 @@
       table {
         border-collapse: collapse;
       }
+      h2 {
+        font-size: 2rem;
+      }
+      h3 {
+        font-size: 1.6rem;
+      }
+      h4 {
+        font-size: 1.4rem;
+      }
+      h5,
+      h6 {
+        font-size: 1.2rem;
+        margin: 0.5rem;
+      }
 
       th {
         background-color: #e2e8f0;
@@ -109,9 +123,9 @@
           width: 90%;
         }
       }
-    .highlight {
-     background-color: #fed7aa;
-    }
+      .highlight {
+        background-color: #fed7aa;
+      }
     </style>
   </head>
   <body>
@@ -146,8 +160,8 @@
         })
         .then((data) => {
           mdContent.innerHTML = marked.parse(data);
-          if (hit){
-            mdContent.innerHTML = highlightHits(mdContent, hit);
+          if (hit) {
+            highlightHits(mdContent, hit);
           }
         })
         .catch((e) => {
@@ -155,23 +169,50 @@
         });
     }
 
-    function highlightHits(source, words){
-      let sourceText = source.innerHTML;
+    function highlightHits(container, words) {
       const wordArray = words.split(" ");
+      const reg = new RegExp(`(${wordArray.join("|")})`, "gi");
 
-      wordArray.forEach(word => {
-        const reg = new RegExp(`(${word})`, "gi");
-        sourceText = sourceText.replace(reg, `<span class="highlight">${word}</span>`);
-      })
+      function traverseAndHighlight(node) {
+        // Skip elements with the "highlight" class
+        if (
+          node.nodeType === Node.ELEMENT_NODE &&
+          node.classList.contains("highlight")
+        ) {
+          return;
+        }
 
-      return sourceText;
+        if (node.nodeType === Node.TEXT_NODE) {
+          // Replace only in text nodes
+          const replacedText = node.textContent.replace(
+            reg,
+            '<span class="highlight">$1</span>',
+          );
+          if (replacedText !== node.textContent) {
+            const wrapper = document.createElement("span");
+            wrapper.innerHTML = replacedText;
+
+            // Insert the new highlighted structure into the DOM
+            const parent = node.parentNode;
+            while (wrapper.firstChild) {
+              parent.insertBefore(wrapper.firstChild, node);
+            }
+            parent.removeChild(node);
+          }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          // Recursively process child nodes
+          Array.from(node.childNodes).forEach(traverseAndHighlight);
+        }
+      }
+
+      traverseAndHighlight(container);
     }
 
-    async function removeHits(){
-      params.delete("hit")
-      history.replaceState(null, '', url.toString());
-
-      fetchContent()
+    async function removeHits() {
+      params.delete("hit");
+      history.replaceState(null, "", url.toString());
+      window.location.reload();
+      //fetchContent()
     }
-</script>
+  </script>
 </html>
