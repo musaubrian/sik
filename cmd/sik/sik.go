@@ -81,6 +81,10 @@ func serverBootstrap() (*server.Server, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to load index: %w", err)
 	}
+	// Makes it a lot easier to not have to stop my global instance
+	if len(os.Getenv("SIK_DEV")) > 0 {
+		return server.New(index).WithPort("4000"), nil
+	}
 
 	return server.New(index), nil
 }
