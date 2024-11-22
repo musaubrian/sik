@@ -2,16 +2,16 @@
 
 > [!IMPORTANT]
 >
-> The project was rewritten to use Go and a **proper-ish* indexing method
-> If you would still like to use the old python version, it will always be available at the [py](https://github.com/musaubrian/sik/tree/py) branch.
+> If you still wish to use the old python version, it's available at the [py](https://github.com/musaubrian/sik/tree/py) branch.
 
 Sik allows you to search through Markdown files within a directory and quickly find the information you need.
 
 ## TODO:
-- [x] **Flexible Querying(WIP):** You can search for any query within the Markdown files. The search is not case-sensitive and supports partial word matches.
+- [x] **Flexible Querying:** You can search for any query within the Markdown files. The search is not case-sensitive and supports partial word matches.
 - [x] **Highlighting/previews**
 - [x] Loads up the file directly in the browser, making it easier to view what you were searching for
 - [x] Bundle up [marked](https://marked.js.org/) and make it completely local
+- [x] LiveSearch: Search on type
 
 
 ## Usage
@@ -52,7 +52,7 @@ sik -b
 
 ### Dev mode
 If you wish to make changes and already have an instance running,
-prefix run command with `SIK_DEV=<anything_you_wish>)`
+prefix run command with `SIK_DEV=<anything_you_wish> air|go run cmd/sik/sik.go`
 
 ## Contributing
 This project is open for contributions!
