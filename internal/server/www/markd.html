@@ -126,9 +126,28 @@
       .highlight {
         background-color: #fed7aa;
       }
+
+      a {
+        font-weight: 600;
+        color: black;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        position: fixed;
+        top: 0;
+        left: 0;
+        padding: 0.5rem;
+      }
+
+      a:hover {
+        color: blue;
+      }
     </style>
   </head>
   <body>
+    <a href="/">
+      <b>&lt back</b>
+    </a>
+
     <h1 id="doc-name"></h1>
     <button onclick="removeHits()">clear highlights</button>
     <div id="md-content"></div>
@@ -153,19 +172,19 @@
       fetch(`/read-doc?url=${file}`)
         .then((response) => {
           if (!response.ok) {
-            h1.innerText = "An error occurred";
-            console.log(response);
+            h1.innerText = `Could not render contents of <${file.split("/").pop()}>`;
+
+            return;
           }
           return response.json();
         })
         .then((data) => {
-          mdContent.innerHTML = marked.parse(data);
-          if (hit) {
-            highlightHits(mdContent, hit);
+          if (data) {
+            mdContent.innerHTML = marked.parse(data);
+            if (hit) {
+              highlightHits(mdContent, hit);
+            }
           }
-        })
-        .catch((e) => {
-          console.error("ERROR: ", e);
         });
     }
 
