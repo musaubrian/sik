@@ -29,41 +29,41 @@ func main() {
 
 	base, err := utils.GetSikBase()
 	if err != nil {
-		core.Logging.Error(err.Error())
+		core.Log.Error(err.Error())
 		return
 	}
 
 	if _, err := os.Stat(base); err != nil {
 		if err := os.Mkdir(base, 0755); err != nil {
-			core.Logging.Error(err.Error())
+			core.Log.Error(err.Error())
 			return
 		}
-		core.Logging.Info(fmt.Sprintf("Created %s", filepath.Base(base)))
+		core.Log.Info(fmt.Sprintf("Created %s", filepath.Base(base)))
 	}
 
 	if len(indexDir) > 0 {
 		contents, err := core.ReadMarkdown(indexDir)
 		if err != nil {
-			core.Logging.Error(err.Error())
+			core.Log.Error(err.Error())
 			return
 		}
 
 		in, err := core.CreateIndex(contents)
 		if err != nil {
-			core.Logging.Error(err.Error())
+			core.Log.Error(err.Error())
 			return
 		}
 		if err := core.SaveIndex(base, in); err != nil {
-			core.Logging.Error(err.Error())
+			core.Log.Error(err.Error())
 			return
 		}
-		core.Logging.Info("Created Index")
+		core.Log.Info("Created Index")
 	}
 
 	if browse {
 		s, err := serverBootstrap()
 		if err != nil {
-			core.Logging.Error(err.Error())
+			core.Log.Error(err.Error())
 			return
 		}
 		s.Start()

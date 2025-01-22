@@ -12,7 +12,7 @@ import (
 	"github.com/musaubrian/sik/internal/utils"
 )
 
-var Logging = logr.New()
+var Log = logr.New().WithColor()
 
 type FileMeta map[string][]int // [filepath]word positions
 type Index map[string]FileMeta
@@ -26,7 +26,7 @@ func ReadMarkdown(dir string) (map[string]string, error) {
 		}
 
 		if d.IsDir() && utils.Ignore(d.Name()) {
-			Logging.Info("SKIPPING " + d.Name())
+			Log.Info("SKIPPING " + d.Name())
 			return filepath.SkipDir
 		}
 

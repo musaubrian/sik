@@ -53,7 +53,7 @@ func TestIndex(t *testing.T) {
 	for _, tt := range singleOccurrenceWords {
 		stemmedWord, err := utils.Stemm(tt.word)
 		if err != nil {
-			Logging.Error(err.Error())
+			Log.Error(err.Error())
 		}
 		if fileMeta, exists := index[stemmedWord]; !exists {
 			t.Errorf("Expected word '%s' to be in the index", tt.word)
@@ -75,7 +75,7 @@ func TestIndex(t *testing.T) {
 	for _, tt := range multiOccurenceWords {
 		stemmedWord, err := utils.Stemm(tt.word)
 		if err != nil {
-			Logging.Error(err.Error())
+			Log.Error(err.Error())
 		}
 		if fileMeta, exists := index[stemmedWord]; !exists {
 			t.Errorf("Expected word '%s' to be in the index", tt.word)
