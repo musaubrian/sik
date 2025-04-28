@@ -79,7 +79,7 @@ func serverBootstrap() (*server.Server, error) {
 
 	index, err := core.LoadIndex(utils.GetIndexLocation(base))
 	if err != nil {
-		return nil, fmt.Errorf("failed to load index: %w", err)
+		return nil, fmt.Errorf("failed to load index:\n\t%w", err)
 	}
 	// Makes it a lot easier to not have to stop my global instance
 	if len(os.Getenv("SIK_DEV")) > 0 {

@@ -13,9 +13,15 @@ import (
 )
 
 var Log = logr.New().WithColor()
+var CurrentVersion = "v2"
 
 type FileMeta map[string][]int // [filepath]word positions
-type Index map[string]FileMeta
+type IndexContents map[string]FileMeta
+
+type Index struct {
+	Version  string
+	Contents IndexContents
+}
 
 func ReadMarkdown(dir string) (map[string]string, error) {
 	fileContents := map[string]string{}
@@ -55,7 +61,9 @@ func ReadMarkdown(dir string) (map[string]string, error) {
 	return fileContents, err
 }
 
-func SaveIndex(basepath string, index Index) error {
+func SaveIndex(basepath string, contents IndexContents) error {
+	index := Index{Version: CurrentVersion, Contents: contents}
+
 	json, err := json.Marshal(index)
 	if err != nil {
 		return err
@@ -69,8 +77,8 @@ func SaveIndex(basepath string, index Index) error {
 	return nil
 }
 
-func CreateIndex(fileContents map[string]string) (Index, error) {
-	index := make(Index)
+func CreateIndex(fileContents map[string]string) (IndexContents, error) {
+	index := make(IndexContents)
 	for name, contents := range fileContents {
 		tokenizedContents := utils.TokenizeContent(contents)
 		for pos, v := range tokenizedContents {
@@ -93,21 +101,25 @@ func CreateIndex(fileContents map[string]string) (Index, error) {
 	return index, nil
 }
 
-func LoadIndex(path string) (Index, error) {
-	index := make(Index)
+func LoadIndex(path string) (IndexContents, error) {
+	var index Index
 
 	f, err := os.Open(path)
 	if err != nil {
-		return index, err
+		return index.Contents, err
 	}
 	defer f.Close()
 
 	decoder := json.NewDecoder(f)
 	err = decoder.Decode(&index)
 	if err != nil {
-		return index, fmt.Errorf("Marshalling failed: %v", err)
+		return index.Contents, fmt.Errorf("Marshalling failed: %v", err)
 	}
 
-	return index, nil
+	if index.Version != CurrentVersion {
+		return index.Contents, fmt.Errorf("Mismatched Versions: Expected <%s> Got <%s>\n\tRe-Index to update to the new version", CurrentVersion, index.Version)
+	}
+
+	return index.Contents, nil
 
 }

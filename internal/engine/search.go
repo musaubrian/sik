@@ -13,11 +13,11 @@ import (
 const maxProximityDistance = 10
 
 type Engine struct {
-	index                core.Index
+	index                core.IndexContents
 	maxProximityDistance int
 }
 
-func New(index core.Index) *Engine {
+func New(index core.IndexContents) *Engine {
 	return &Engine{
 		index:                index,
 		maxProximityDistance: maxProximityDistance,
@@ -153,7 +153,7 @@ func mergeAll(resultSets []core.FileMeta) map[string]struct{} {
 	return commonDocs
 }
 
-func wordsAppearInSequence(doc string, queryWords []string, index core.Index) bool {
+func wordsAppearInSequence(doc string, queryWords []string, index core.IndexContents) bool {
 	firstWord := queryWords[0]
 	firstWordPositions := index[firstWord][doc]
 
@@ -178,7 +178,7 @@ func wordsAppearInSequence(doc string, queryWords []string, index core.Index) bo
 	return false
 }
 
-func wordsInProximity(doc string, words []string, index core.Index, maxDistance int) bool {
+func wordsInProximity(doc string, words []string, index core.IndexContents, maxDistance int) bool {
 	wordPositions := make([][]int, len(words))
 	for i, word := range words {
 		if pos, ok := index[word][doc]; ok {

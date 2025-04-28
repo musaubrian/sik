@@ -23,7 +23,7 @@ type Server struct {
 	engine *engine.Engine
 }
 
-func New(index core.Index) *Server {
+func New(index core.IndexContents) *Server {
 	return &Server{
 		port:   "8990",
 		engine: engine.New(index),
