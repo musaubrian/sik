@@ -124,23 +124,6 @@ func orderedEqual(a, b []string) bool {
 	return true
 }
 
-func unorderedEqual(a, b []string) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	m := make(map[string]int, len(a))
-	for _, s := range a {
-		m[s]++
-	}
-	for _, s := range b {
-		if m[s] == 0 {
-			return false
-		}
-		m[s]--
-	}
-	return true
-}
-
 func normalizeDocRes(docs []DocRes) []string {
 	vals := []string{}
 	for _, doc := range docs {
