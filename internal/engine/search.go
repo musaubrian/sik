@@ -32,6 +32,8 @@ func New(index core.IndexContents) *Engine {
 func removeDuplicates(in []DocRes) []string {
 	clean := []string{}
 
+	slices.SortStableFunc(in, cmp)
+
 	for _, v := range in {
 		if !slices.Contains(clean, v.Path) {
 			clean = append(clean, v.Path)
@@ -208,15 +210,17 @@ func wordsInProximity(doc string, words []string, index core.IndexContents, maxD
 
 func sortDocs(docs []DocRes) []DocRes {
 	// cmp is reversed as I want them in descending order
-	slices.SortStableFunc(docs, func(a, b DocRes) int {
-		if a.Occurences > b.Occurences {
-			return -1
-		}
-		if a.Occurences < b.Occurences {
-			return 1
-		}
-		return 0
-	})
+	slices.SortStableFunc(docs, cmp)
 
 	return docs
+}
+
+func cmp(a, b DocRes) int {
+	if a.Occurences > b.Occurences {
+		return -1
+	}
+	if a.Occurences < b.Occurences {
+		return 1
+	}
+	return 0
 }
