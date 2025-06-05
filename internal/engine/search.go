@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math"
 	"slices"
-	"sort"
 	"strings"
 
 	"github.com/musaubrian/sik/internal/core"
@@ -23,14 +22,6 @@ type DocRes struct {
 	Occurences int
 }
 
-type SearchResult []DocRes
-
-func (s SearchResult) Len() int      { return len(s) }
-func (s SearchResult) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
-
-// reverse them instead
-func (s SearchResult) Less(i, j int) bool { return s[i].Occurences > s[j].Occurences }
-
 func New(index core.IndexContents) *Engine {
 	return &Engine{
 		index:                index,
@@ -38,9 +29,17 @@ func New(index core.IndexContents) *Engine {
 	}
 }
 
-func removeDuplicates(in SearchResult) []string {
-	// TODO:: probably switch to slices.SortStableFunc
-	sort.Sort(in)
+func removeDuplicates(in []DocRes) []string {
+	slices.SortStableFunc(in, func(a, b DocRes) int {
+		// cmp is reversed as I want them in descending order
+		if a.Occurences > b.Occurences {
+			return -1
+		}
+		if a.Occurences < b.Occurences {
+			return 1
+		}
+		return 0
+	})
 
 	clean := []string{}
 
