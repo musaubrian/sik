@@ -30,17 +30,6 @@ func New(index core.IndexContents) *Engine {
 }
 
 func removeDuplicates(in []DocRes) []string {
-	slices.SortStableFunc(in, func(a, b DocRes) int {
-		// cmp is reversed as I want them in descending order
-		if a.Occurences > b.Occurences {
-			return -1
-		}
-		if a.Occurences < b.Occurences {
-			return 1
-		}
-		return 0
-	})
-
 	clean := []string{}
 
 	for _, v := range in {
@@ -89,7 +78,7 @@ func (se *Engine) simpleSearch(query string) ([]DocRes, error) {
 		}
 	}
 
-	return results, nil
+	return sortDocs(results), nil
 }
 
 func (se *Engine) phraseSearch(phrase []string) ([]DocRes, error) {
@@ -117,7 +106,7 @@ func (se *Engine) phraseSearch(phrase []string) ([]DocRes, error) {
 		}
 	}
 
-	return res, nil
+	return sortDocs(res), nil
 }
 
 func (se *Engine) proximitySearch(query []string) ([]DocRes, error) {
@@ -146,7 +135,7 @@ func (se *Engine) proximitySearch(query []string) ([]DocRes, error) {
 		}
 
 	}
-	return finalResult, nil
+	return sortDocs(finalResult), nil
 }
 
 func mergeAll(resultSets []core.FileMeta) map[string][]int {
@@ -215,4 +204,19 @@ func wordsInProximity(doc string, words []string, index core.IndexContents, maxD
 	}
 
 	return false
+}
+
+func sortDocs(docs []DocRes) []DocRes {
+	// cmp is reversed as I want them in descending order
+	slices.SortStableFunc(docs, func(a, b DocRes) int {
+		if a.Occurences > b.Occurences {
+			return -1
+		}
+		if a.Occurences < b.Occurences {
+			return 1
+		}
+		return 0
+	})
+
+	return docs
 }

@@ -7,3 +7,5 @@ A brief description of my project. *duplicate*
 - Feature 2
 - Feature 3
 
+second description of another project Im working on and another description of sth else
+
