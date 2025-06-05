@@ -1,4 +1,4 @@
 *.sik
 .air.toml
 tmp/
-sik*
+sik

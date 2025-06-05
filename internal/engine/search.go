@@ -13,23 +13,28 @@ import (
 const maxProximityDistance = 10
 
 type Engine struct {
-	index                core.Index
+	index                core.IndexContents
 	maxProximityDistance int
 }
 
-func New(index core.Index) *Engine {
+type DocRes struct {
+	Path       string
+	Occurences int
+}
+
+func New(index core.IndexContents) *Engine {
 	return &Engine{
 		index:                index,
 		maxProximityDistance: maxProximityDistance,
 	}
 }
 
-func removeDuplicates(in []string) []string {
+func removeDuplicates(in []DocRes) []string {
 	clean := []string{}
 
 	for _, v := range in {
-		if !slices.Contains(clean, v) {
-			clean = append(clean, v)
+		if !slices.Contains(clean, v.Path) {
+			clean = append(clean, v.Path)
 		}
 	}
 
@@ -58,26 +63,26 @@ func (se *Engine) Search(query string) ([]string, error) {
 	return removeDuplicates(proximityResults), nil
 }
 
-func (se *Engine) simpleSearch(query string) ([]string, error) {
+func (se *Engine) simpleSearch(query string) ([]DocRes, error) {
 	stemmed, err := utils.Stemm(query)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to stemm word: %v", err)
 	}
 
-	results := []string{}
+	results := []DocRes{}
 	for k, meta := range se.index {
 		if strings.Contains(k, stemmed) {
-			for path := range meta {
-				results = append(results, path)
+			for path, occurences := range meta {
+				results = append(results, DocRes{Path: path, Occurences: len(occurences)})
 			}
 		}
 	}
 
-	return results, nil
+	return sortDocs(results), nil
 }
 
-func (se *Engine) phraseSearch(phrase []string) ([]string, error) {
-	res := []string{}
+func (se *Engine) phraseSearch(phrase []string) ([]DocRes, error) {
+	res := []DocRes{}
 	set := []core.FileMeta{}
 
 	stemmedPhrase, err := utils.StemMult(phrase)
@@ -95,17 +100,17 @@ func (se *Engine) phraseSearch(phrase []string) ([]string, error) {
 
 	commonDocs := mergeAll(set)
 
-	for doc := range commonDocs {
+	for doc, occ := range commonDocs {
 		if wordsAppearInSequence(doc, stemmedPhrase, se.index) {
-			res = append(res, doc)
+			res = append(res, DocRes{Path: doc, Occurences: len(occ)})
 		}
 	}
 
-	return res, nil
+	return sortDocs(res), nil
 }
 
-func (se *Engine) proximitySearch(query []string) ([]string, error) {
-	finalResult := []string{}
+func (se *Engine) proximitySearch(query []string) ([]DocRes, error) {
+	finalResult := []DocRes{}
 	resultsSet := []core.FileMeta{}
 
 	stemmedQuery, err := utils.StemMult(query)
@@ -124,36 +129,35 @@ func (se *Engine) proximitySearch(query []string) ([]string, error) {
 
 	commonDocs := mergeAll(resultsSet)
 
-	for doc := range commonDocs {
+	for doc, occ := range commonDocs {
 		if wordsInProximity(doc, stemmedQuery, se.index, se.maxProximityDistance) {
-			finalResult = append(finalResult, doc)
+			finalResult = append(finalResult, DocRes{Path: doc, Occurences: len(occ)})
 		}
 
 	}
-	return finalResult, nil
+	return sortDocs(finalResult), nil
 }
 
-func mergeAll(resultSets []core.FileMeta) map[string]struct{} {
-	commonDocs := make(map[string]struct{})
+func mergeAll(resultSets []core.FileMeta) map[string][]int {
+	commonDocs := make(map[string][]int)
 	if len(resultSets) == 0 {
 		return commonDocs
 	}
 
-	for doc := range resultSets[0] {
-		commonDocs[doc] = struct{}{}
-	}
-
-	for _, resultSet := range resultSets[1:] {
-		for doc := range commonDocs {
-			if _, found := resultSet[doc]; !found {
-				delete(commonDocs, doc) // Remove if not in current set
+	for _, meta := range resultSets {
+		for path, occ := range meta {
+			if val, foundExisting := commonDocs[path]; !foundExisting {
+				commonDocs[path] = val
 			}
+
+			commonDocs[path] = append(commonDocs[path], occ...)
 		}
 	}
+
 	return commonDocs
 }
 
-func wordsAppearInSequence(doc string, queryWords []string, index core.Index) bool {
+func wordsAppearInSequence(doc string, queryWords []string, index core.IndexContents) bool {
 	firstWord := queryWords[0]
 	firstWordPositions := index[firstWord][doc]
 
@@ -165,11 +169,12 @@ func wordsAppearInSequence(doc string, queryWords []string, index core.Index) bo
 			nextWordPositions := index[nextWord][doc]
 			expectedPos := startPos + i
 
-			if !containsPosition(nextWordPositions, expectedPos) {
+			if !slices.Contains(nextWordPositions, expectedPos) {
 				matched = false
 				break
 			}
 		}
+
 		if matched {
 			return true
 		}
@@ -178,7 +183,7 @@ func wordsAppearInSequence(doc string, queryWords []string, index core.Index) bo
 	return false
 }
 
-func wordsInProximity(doc string, words []string, index core.Index, maxDistance int) bool {
+func wordsInProximity(doc string, words []string, index core.IndexContents, maxDistance int) bool {
 	wordPositions := make([][]int, len(words))
 	for i, word := range words {
 		if pos, ok := index[word][doc]; ok {
@@ -188,7 +193,7 @@ func wordsInProximity(doc string, words []string, index core.Index, maxDistance 
 		}
 	}
 
-	for i := 0; i < len(wordPositions)-1; i++ {
+	for i := range len(wordPositions) - 1 {
 		for _, pos1 := range wordPositions[i] {
 			for _, pos2 := range wordPositions[i+1] {
 				if math.Abs(float64(pos1)-float64(pos2)) <= float64(maxDistance) {
@@ -201,11 +206,17 @@ func wordsInProximity(doc string, words []string, index core.Index, maxDistance 
 	return false
 }
 
-func containsPosition(positions []int, pos int) bool {
-	for _, p := range positions {
-		if p == pos {
-			return true
+func sortDocs(docs []DocRes) []DocRes {
+	// cmp is reversed as I want them in descending order
+	slices.SortStableFunc(docs, func(a, b DocRes) int {
+		if a.Occurences > b.Occurences {
+			return -1
 		}
-	}
-	return false
+		if a.Occurences < b.Occurences {
+			return 1
+		}
+		return 0
+	})
+
+	return docs
 }
