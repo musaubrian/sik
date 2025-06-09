@@ -57,7 +57,7 @@ func (s *Server) Start() {
 	})
 
 	http.HandleFunc("GET /js/markd.min.js", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json;charset=utf-8")
+		w.Header().Set("Content-Type", "text/javascript")
 		markMinJs, err := www.ReadFile("www/markd.min.js")
 		if err != nil {
 			core.Log.Error(fmt.Sprintf("[/markd.min.js] Failed to get markdjs: %v", err))
