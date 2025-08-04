@@ -68,7 +68,8 @@ func SaveIndex(basepath string, contents IndexContents) error {
 	if err != nil {
 		return err
 	}
-	f, err := os.OpenFile(utils.GetIndexLocation(basepath), os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0660)
+	f, err := os.OpenFile(utils.GetIndexLocation(basepath),
+		os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0660)
 	if err != nil {
 		return err
 	}
@@ -117,7 +118,9 @@ func LoadIndex(path string) (IndexContents, error) {
 	}
 
 	if index.Version != CurrentVersion {
-		return index.Contents, fmt.Errorf("Mismatched Versions: Expected <%s> Got <%s>\n\tRe-Index to update to the new version", CurrentVersion, index.Version)
+		return index.Contents, fmt.Errorf(`Mismatched Versions: Expected <%s> Got <%s>
+	Re-Index to update to the new version`,
+			CurrentVersion, index.Version)
 	}
 
 	return index.Contents, nil

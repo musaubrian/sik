@@ -29,21 +29,20 @@ func New(index core.IndexContents) *Engine {
 	}
 }
 
-func removeDuplicates(in []DocRes) []string {
-	clean := []string{}
-
-	slices.SortStableFunc(in, cmp)
+func removeDuplicates(in []DocRes) []DocRes {
+	seen := make(map[string]bool)
+	cleanDocs := []DocRes{}
 
 	for _, v := range in {
-		if !slices.Contains(clean, v.Path) {
-			clean = append(clean, v.Path)
+		if !seen[v.Path] {
+			cleanDocs = append(cleanDocs, v)
 		}
 	}
 
-	return clean
+	return cleanDocs
 }
 
-func (se *Engine) Search(query string) ([]string, error) {
+func (se *Engine) Search(query string) ([]DocRes, error) {
 	tokens := utils.TokenizeContent(query)
 	if len(tokens) == 1 {
 		simpleSearchRes, err := se.simpleSearch(tokens[0])

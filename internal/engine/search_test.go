@@ -102,11 +102,11 @@ func TestGeneralSearch(t *testing.T) {
 			t.Errorf("Expect <nil> got %v", err)
 		}
 
-		if len(searchRes) < 0 {
+		if len(searchRes) == 0 {
 			t.Errorf("Expected non empty result")
 		}
 
-		if !orderedEqual(searchRes, tc.expected) {
+		if !orderedEqual(normalizeDocRes(searchRes), tc.expected) {
 			t.Errorf("For: <%s>; got %v, want %v", tc.query, searchRes, tc.expected)
 		}
 	}
