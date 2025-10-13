@@ -186,15 +186,22 @@
         name="query"
         id="searchInput"
         placeholder="search through"
+        autocomplete="on"
+        list="cmpList"
         autofocus
         required
       />
+      <datalist id="cmpList"></datalist>
     </form>
     <div id="results"></div>
   </body>
   <script>
     const searchForm = document.getElementById("search");
     const resultsContainer = document.getElementById("results");
+    const cmpKey = "sik:cmp";
+
+    let searches = JSON.parse(localStorage.getItem(cmpKey)) || [];
+    buildCmpList(searches);
 
     let liveSearch = getLiveSearch();
 
@@ -261,6 +268,14 @@
     searchForm.addEventListener("submit", async function (event) {
       event.preventDefault();
       const submitFormData = new FormData(event.target);
+
+      const q = submitFormData.get("query");
+      if (!searches.includes(q)) {
+        searches.push(q);
+        localStorage.setItem(cmpKey, JSON.stringify(searches));
+        buildCmpList(searches);
+      }
+
       const data = await search(submitFormData);
       resultsContainer.innerHTML = "";
       render_results(data, submitFormData);
@@ -276,7 +291,6 @@
         if (!response.ok) {
           return [];
         }
-        console.log(data);
         return data;
       } catch (e) {
         console.error(`ERROR: ${e}`);
@@ -318,8 +332,18 @@
         resultsContainer.appendChild(fileElement);
       }
     }
+
     function clip(text) {
       navigator.clipboard.writeText(text).catch((e) => alert(e));
+    }
+
+    function buildCmpList(data) {
+      cmpList.innerHtml = "";
+      data.forEach((item) => {
+        const option = document.createElement("option");
+        option.value = item;
+        cmpList.appendChild(option);
+      });
     }
   </script>
 </html>
