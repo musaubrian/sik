@@ -9,7 +9,7 @@ import (
 
 func TestSimpleSearch(t *testing.T) {
 	res, _ := core.ReadMarkdown("../test_src")
-	in, _ := core.CreateIndex(res)
+	in, _ := core.CreateIndex(res.Contents)
 
 	words := []string{"duplicate", "features", "description", "brief"}
 
@@ -28,7 +28,7 @@ func TestSimpleSearch(t *testing.T) {
 
 func TestPhraseSearch(t *testing.T) {
 	res, _ := core.ReadMarkdown("../test_src")
-	ind, _ := core.CreateIndex(res)
+	ind, _ := core.CreateIndex(res.Contents)
 
 	s := New(ind)
 
@@ -57,7 +57,7 @@ func TestPhraseSearch(t *testing.T) {
 func TestProximitySearch(t *testing.T) {
 
 	res, _ := core.ReadMarkdown("../test_src")
-	ind, _ := core.CreateIndex(res)
+	ind, _ := core.CreateIndex(res.Contents)
 
 	s := New(ind)
 	testCases := []struct {
@@ -84,7 +84,7 @@ func TestProximitySearch(t *testing.T) {
 
 func TestGeneralSearch(t *testing.T) {
 	res, _ := core.ReadMarkdown("../test_src")
-	ind, _ := core.CreateIndex(res)
+	ind, _ := core.CreateIndex(res.Contents)
 
 	s := New(ind)
 	testCases := []struct {

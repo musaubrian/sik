@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/musaubrian/sik/internal/core"
 	"github.com/musaubrian/sik/internal/server"
@@ -41,25 +42,6 @@ func main() {
 		core.Log.Info(fmt.Sprintf("Created %s", filepath.Base(base)))
 	}
 
-	if len(indexDir) > 0 {
-		contents, err := core.ReadMarkdown(indexDir)
-		if err != nil {
-			core.Log.Error(err.Error())
-			return
-		}
-
-		in, err := core.CreateIndex(contents)
-		if err != nil {
-			core.Log.Error(err.Error())
-			return
-		}
-		if err := core.SaveIndex(base, in); err != nil {
-			core.Log.Error(err.Error())
-			return
-		}
-		core.Log.Info("Created Index")
-	}
-
 	if browse {
 		s, err := serverBootstrap()
 		if err != nil {
@@ -67,6 +49,31 @@ func main() {
 			return
 		}
 		s.Start()
+	}
+
+	start := time.Now()
+	md, err := core.ReadMarkdown(indexDir)
+	if err != nil {
+		core.Log.Error(err.Error())
+		return
+	}
+
+	in, err := core.CreateIndex(md.Contents)
+	if err != nil {
+		core.Log.Error(err.Error())
+		return
+	}
+
+	if err := core.SaveIndex(base, in); err != nil {
+		core.Log.Error(err.Error())
+		return
+	}
+
+	tt := time.Since(start).Milliseconds()
+	core.Log.Info(fmt.Sprintf("Indexed %d files", md.FilesRead))
+	core.Log.Info(fmt.Sprintf("Skipped %d dir(s)", md.SkippedDirsCount))
+	if md.FilesRead > 0 {
+		core.Log.Debug(fmt.Sprintf("Took %dms", tt))
 	}
 
 }

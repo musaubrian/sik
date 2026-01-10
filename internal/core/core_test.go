@@ -21,7 +21,7 @@ func TestReadMarkdown(t *testing.T) {
 	}
 
 	for _, tt := range testPaths {
-		if key, ok := res[tt.path]; !ok {
+		if key, ok := res.Contents[tt.path]; !ok {
 			t.Fatalf("Expected <%s>, Got <%s>", tt.path, key)
 		}
 	}
@@ -31,7 +31,7 @@ func TestReadMarkdown(t *testing.T) {
 func TestCreateIndex(t *testing.T) {
 	res, _ := ReadMarkdown("./../test_src")
 
-	_, err := CreateIndex(res)
+	_, err := CreateIndex(res.Contents)
 	if err != nil {
 		t.Fatalf("Expected <nil> got <%s>", err)
 	}
@@ -40,7 +40,7 @@ func TestCreateIndex(t *testing.T) {
 func TestIndex(t *testing.T) {
 	res, _ := ReadMarkdown("../test_src")
 
-	index, _ := CreateIndex(res)
+	index, _ := CreateIndex(res.Contents)
 
 	singleOccurrenceWords := []struct {
 		word string

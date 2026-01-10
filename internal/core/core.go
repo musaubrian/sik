@@ -12,7 +12,7 @@ import (
 	"github.com/musaubrian/sik/internal/utils"
 )
 
-var Log = logr.New().WithColor()
+var Log = logr.New()
 var CurrentVersion = "v2"
 
 type FileMeta map[string][]int // [filepath]word positions
@@ -23,8 +23,16 @@ type Index struct {
 	Contents IndexContents
 }
 
-func ReadMarkdown(dir string) (map[string]string, error) {
+type MarkdownResult struct {
+	Contents         map[string]string
+	FilesRead        int64
+	SkippedDirsCount int64
+}
+
+func ReadMarkdown(dir string) (MarkdownResult, error) {
 	fileContents := map[string]string{}
+	fileCount := 0
+	skippedDirsCount := 0
 
 	err := filepath.WalkDir(dir, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
@@ -32,13 +40,14 @@ func ReadMarkdown(dir string) (map[string]string, error) {
 		}
 
 		if d.IsDir() && utils.Ignore(d.Name()) {
-			Log.Info("SKIPPING " + d.Name())
+			skippedDirsCount += 1
 			return filepath.SkipDir
 		}
 
 		if !d.IsDir() && strings.HasSuffix(d.Name(), ".md") {
 			f, err := os.Open(path)
 			if err != nil {
+				f.Close()
 				return err
 			}
 			defer f.Close()
@@ -53,12 +62,17 @@ func ReadMarkdown(dir string) (map[string]string, error) {
 			}
 
 			fileContents[path] = content.String()
+			fileCount += 1
 		}
 
 		return nil
 	})
 
-	return fileContents, err
+	return MarkdownResult{
+		Contents:         fileContents,
+		FilesRead:        int64(fileCount),
+		SkippedDirsCount: int64(skippedDirsCount),
+	}, err
 }
 
 func SaveIndex(basepath string, contents IndexContents) error {
