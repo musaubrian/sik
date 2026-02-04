@@ -39,9 +39,24 @@ func GetSikBase() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	base := path.Join(home, ".sik")
+	base := path.Join(home, ".cache", "sik")
+
+	cleanupOldIndex(home)
 
 	return base, nil
+}
+
+func cleanupOldIndex(home string) {
+	oldBase := path.Join(home, ".sik")
+	fileInfo, err := os.Stat(oldBase)
+	if err != nil {
+		return
+	}
+
+	if fileInfo.IsDir() {
+		_ = os.RemoveAll(oldBase)
+	}
+
 }
 
 func GetIndexLocation(base string) string {

@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/musaubrian/sik/internal/core"
@@ -39,7 +38,7 @@ func main() {
 			core.Log.Error(err.Error())
 			return
 		}
-		core.Log.Info(fmt.Sprintf("Created %s", filepath.Base(base)))
+		core.Log.Info(fmt.Sprintf("Created %s", base))
 	}
 
 	if browse {

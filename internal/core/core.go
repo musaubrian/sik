@@ -13,7 +13,7 @@ import (
 )
 
 var Log = logr.New()
-var CurrentVersion = "v2"
+var CurrentVersion = "v3"
 
 type FileMeta map[string][]int // [filepath]word positions
 type IndexContents map[string]FileMeta
